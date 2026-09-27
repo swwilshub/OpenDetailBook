@@ -1,4 +1,4 @@
-# The Pattern Book
+# The Open Detail Book
 
 A book of UK construction details, each an interactive explainer with live 2D heat-flow calculations (ψ-values, fRsi, Uf), for UK construction details.
 
