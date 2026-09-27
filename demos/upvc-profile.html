@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Inside a uPVC window profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--paper:#E4E9E3;--sheet:#F3F6F1;--ink:#15263A;--ink2:#4B5C6D;--rule:#B5C0B8;--pencil:#D39E00;--fault:#BF3A2B;--ok:#2C7A57;--warn:#C27400;--rain:#2F78B7;--air:#2C8A5A;--halo:#F3F6F1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0F161D;--sheet:#16202A;--ink:#E2E8E3;--ink2:#9BA9B4;--rule:#2D3A45;--pencil:#F2C232;--fault:#E4675A;--ok:#5FBE92;--warn:#E8A53E;--rain:#6FB0E8;--air:#62C58F;--halo:#16202A}}
+:root[data-theme="dark"]{--paper:#0F161D;--sheet:#16202A;--ink:#E2E8E3;--ink2:#9BA9B4;--rule:#2D3A45;--pencil:#F2C232;--fault:#E4675A;--ok:#5FBE92;--warn:#E8A53E;--rain:#6FB0E8;--air:#62C58F;--halo:#16202A}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 Barlow,"Segoe UI",system-ui,-apple-system,sans-serif}
+.wrap{max-width:880px;margin:0 auto;padding:0 16px}
+header{padding:28px 0 6px}
+h1{font-family:"Barlow Semi Condensed","Arial Narrow",Barlow,sans-serif;font-weight:700;font-size:clamp(30px,6.4vw,48px);line-height:1.02;margin:0 0 10px;letter-spacing:-.01em;max-width:18ch}
+.lede{color:var(--ink2);max-width:62ch;margin:0}
+.stage{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);padding:12px 0 6px}
+@media (max-height:620px){.stage{position:static}}
+.sheet{background:#F3F6F1;border:1px solid var(--rule);border-radius:3px;overflow:hidden;position:relative}
+#view{display:block;width:100%}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:12.5px;color:var(--ink2);padding:6px 2px 0}
+.ramp{display:inline-block;width:100px;height:8px;border-radius:1px;vertical-align:middle;margin:0 4px;background:linear-gradient(90deg,#1E3A6E,#2B7A9E,#7FB7A4,#EBC15A,#D2522F)}
+.vbtn{position:absolute;right:6px;bottom:6px;display:flex;gap:4px}
+.vbtn button{min-height:30px;padding:3px 9px;font-size:13px;opacity:.92}
+.story{padding:10px 0 4px;min-height:200px}
+.chap{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.num{font-family:"Barlow Semi Condensed",sans-serif;font-weight:600;color:var(--ink2);font-variant-numeric:tabular-nums;font-size:14px}
+h2{font-family:"Barlow Semi Condensed","Arial Narrow",sans-serif;font-weight:700;font-size:23px;line-height:1.15;margin:0}
+.story p{margin:6px 0 0;max-width:66ch}
+.dyn b{font-weight:600}
+.controls{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+button,select{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:6px 12px;min-height:38px;cursor:pointer}
+button:hover{border-color:var(--ink2)}
+:focus-visible{outline:2px solid var(--pencil);outline-offset:2px}
+#play{min-width:84px;font-weight:600}
+.pips{display:flex;gap:5px;flex-wrap:wrap}
+.pip{width:26px;height:26px;min-height:0;padding:0;font-size:12.5px;font-family:"Barlow Semi Condensed",sans-serif}
+.pip[aria-current="step"]{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.reads{display:grid;grid-template-columns:repeat(4,1fr);border-top:1.5px solid var(--ink);border-bottom:1px solid var(--rule);margin-top:16px}
+.read{padding:8px 10px 9px;border-left:1px solid var(--rule);display:flex;flex-direction:column;min-width:0}
+.read:first-child{border-left:0;padding-left:0}
+.read .k{font-size:13px;color:var(--ink2)}
+.read .v{font-family:"Barlow Semi Condensed",sans-serif;font-weight:700;font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.read .s{font-size:12.5px;color:var(--ink2);line-height:1.3}
+.bad{color:var(--fault)}.good{color:var(--ok)}.meh{color:var(--warn)}
+@media (max-width:560px){.reads{grid-template-columns:repeat(2,1fr)}.read:nth-child(3){border-left:0;padding-left:0}.read:nth-child(n+3){border-top:1px solid var(--rule)}.read .v{font-size:24px}}
+section.lab,section.notes{padding:34px 0 8px}
+section h3{font-family:"Barlow Semi Condensed",sans-serif;font-weight:600;font-size:18px;margin:22px 0 4px}
+.lab p,.notes p{max-width:66ch;margin:6px 0}
+.ctl{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media (max-width:560px){.ctl{grid-template-columns:1fr}}
+.ctl label{display:flex;flex-direction:column;gap:4px;font-weight:500}
+.ctl .wide{grid-column:1/-1}
+.ctl output{font-weight:400;color:var(--ink2)}
+input[type=range]{width:100%;accent-color:var(--pencil);height:30px}
+.small{font-size:13.5px;color:var(--ink2)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;margin-top:8px}
+th,td{text-align:left;padding:7px 8px 7px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;border-bottom:1.5px solid var(--ink)}
+td:first-child{font-weight:600;white-space:nowrap}
+.tscroll{overflow-x:auto}
+.notes ul{padding-left:20px;max-width:66ch}.notes li{margin:5px 0}
+footer{padding:20px 0 40px;font-size:13px;color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Inside a uPVC window profile</h1>
+<p class="lede">A 70 mm uPVC casement drawn chamber by chamber, dropped into the same cavity-wall jamb and solved for heat flow in your browser. The profile has to keep water out, drain what gets in, stay warm, hold screws and give sealants somewhere to sit, all inside one extrusion.</p>
+</header>
+
+<div class="stage">
+<div class="sheet"><canvas id="view" role="img" aria-label="Plan section of a uPVC window frame and sash in a cavity wall reveal"></canvas>
+<div class="vbtn"><button id="vClose">Profile</button><button id="vWide">Wall</button></div></div>
+<div class="legend"><span>0 °C<span class="ramp" aria-hidden="true"></span>20 °C</span><span>Outside at the top. Plan section through the jamb.</span></div>
+</div>
+
+<section class="story" aria-live="polite">
+<div class="chap"><span class="num" id="chNum">1 of 9</span><h2 id="chTitle">Loading</h2></div>
+<p id="chText">Setting up the solver.</p>
+<p id="chDyn" class="dyn"></p>
+<div class="controls">
+<button id="prev" aria-label="Previous step">‹</button>
+<button id="play">Pause</button>
+<button id="next" aria-label="Next step">›</button>
+<div class="pips" id="pips"></div>
+</div>
+</section>
+
+<div class="reads">
+<div class="read"><span class="k">Frame Uf</span><span class="v" id="rUf">–</span><span class="s">W/m²K, ISO 10077-2 style</span></div>
+<div class="read"><span class="k">Installation ψ</span><span class="v" id="rPsi">–</span><span class="s" id="sPsi">W/mK</span></div>
+<div class="read"><span class="k">fRsi, reveal</span><span class="v" id="rFw">–</span><span class="s" id="sFw">needs 0.75 or more</span></div>
+<div class="read"><span class="k">fRsi, frame</span><span class="v" id="rFf">–</span><span class="s" id="sFf">window's own surface</span></div>
+</div>
+
+<section class="lab" id="lab">
+<h2>Build your own profile</h2>
+<p>Change one thing at a time and watch what it costs somewhere else. Each change re-runs three solves: the wall with the window, the window on its own for Uf, and a condensation run.</p>
+<div class="ctl">
+<label class="wide">Frame position in the wall <output id="oPos"></output><input type="range" id="pos" min="10" max="240" step="5" value="125"></label>
+<label>Chambers<select id="chambers"><option value="5">5 chambers, split webs</option><option value="3">3 chambers, older design</option></select></label>
+<label>Reinforcement<select id="reinf"><option value="steel">Galvanised steel</option><option value="grp">Glass-fibre composite</option><option value="none">None</option></select></label>
+<label>Drainage<select id="drained"><option value="1">Chambers drained and vented</option><option value="0">Sealed, no drainage</option></select></label>
+<label>Fitting gap<select id="gap"><option value="foam">Low-expansion foam, sealed both sides</option><option value="empty">Empty, external silicone only</option><option value="open">Open, no external seal</option></select></label>
+<label>Inner leaf block<select id="block"><option value="0.15">Aircrete, λ 0.15</option><option value="0.51">Medium density, λ 0.51</option><option value="1.13">Dense aggregate, λ 1.13</option></select></label>
+</div>
+<p class="small" id="labStatus"></p>
+</section>
+
+<section class="notes">
+<h2>Why the extrusion is a compromise</h2>
+<p>Every millimetre of the 70 mm depth is claimed by more than one job. This is roughly how the space is shared out, from outside to inside.</p>
+<div class="tscroll"><table>
+<thead><tr><th>Zone</th><th>Job</th><th>What it costs</th></tr></thead>
+<tbody>
+<tr><td>Rain screen</td><td>Outer gasket stops most rain and breaks the wind's momentum</td><td>Not airtight on purpose, so some water gets past</td></tr>
+<tr><td>Drainage chambers</td><td>Collect water behind the rain screen and drain it out through slots in the bottom run</td><td>Vented to outside, so the front chamber counts for about half as much insulation</td></tr>
+<tr><td>Pressure-equalised rebate</td><td>Holds outdoor pressure so water is not pushed inwards; also houses hinges and locking gear</td><td>A cold, air-filled gap between frame and sash</td></tr>
+<tr><td>Reinforcement chamber</td><td>Steel gives stiffness, and screws for fixings, hinges and handles bite into it</td><td>Steel conducts about 300 times better than PVC</td></tr>
+<tr><td>Thermal chambers</td><td>Small sealed chambers, split by webs, cut convection and radiation</td><td>More webs mean more PVC paths and a harder extrusion</td></tr>
+<tr><td>Air seal</td><td>Inner gasket on the warm side, where there is no water to push through</td><td>Must be continuous at corners and hardware</td></tr>
+<tr><td>Sealant zones</td><td>Glazing gaskets, perimeter silicone, fitting-gap foam and internal airtightness tape</td><td>Gaps left here bypass everything above</td></tr>
+</tbody></table></div>
+<h3>How the calculation is done</h3>
+<p>A finite-volume solver on a 1 mm grid through the profile and 5 to 50 mm grid in the wall, with 20 °C inside and 0 °C outside, Rsi 0.13 and Rse 0.04 m²K/W for heat flow and Rsi 0.25 for the condensation run. Air chambers are replaced by an equivalent conductivity worked out from each chamber's size, following the ISO 10077-2 method for convection and radiation; chambers open to outside air through drainage slots count double. The sealed unit is replaced by a 28 mm insulation panel (λ 0.035), as BR 497 and ISO 10077-2 do.</p>
+<p>Uf comes from the window on its own, with the faces that touch the wall treated as adiabatic: Uf = (L2D − Up × bp) / bf, with a 112 mm frame sightline. Installation ψ = L2D of the whole jamb − Uwall × 1 m − the window's own L2D.</p>
+<ul>
+<li>This is a representative 70 mm casement, not a specific system. Wall thicknesses are rounded to 2 to 3 mm by the 1 mm grid, so Uf comes out somewhat higher than most brochure values.</li>
+<li>Materials: rigid PVC 0.17, steel 50, glass-fibre composite 0.30, EPDM 0.25, silicone 0.35, low-expansion foam 0.04 W/mK.</li>
+<li>Discrete items (fixing straps, screws, hinges, glazing packers) are point bridges and are not in a 2D calculation. They are drawn for context only.</li>
+<li>Standards and guidance are referred to from memory. Check ISO 10077-2, BR 497, BRE IP1/06 and the system supplier's data before relying on these numbers.</li>
+</ul>
+</section>
+<footer>Downloadable, self-contained page. Wall build-up as the companion jamb model: 100 mm brick, 100 mm full-fill cavity (λ 0.032), 100 mm block, 15 mm plaster.</footer>
+</div>
+<script id="solverSrc">
+// ===== Profile-level 2D heat solver (plan section of a window jamb) =====
+// World coords in mm: x along the wall (reveal at 1000), y through the wall (brick face 10, room face 325).
+var PAD=10, Y_BRICK=110, Y_CAV=210, Y_BLOCK=310, Y_FACE=325;
+var XREV=1000, FX=1010, CL_X=950, XMAX=1325;
+var RSE=0.04, RSI=0.13, RSI_F=0.25, TI=20, TE=0, DT=20;
+var LAM_INS=0.032, LAM_BRICK=0.77, LAM_PL=0.57;
+// material ids
+var M={AIR:0,BRICK:1,INS:2,BLOCK:3,PLASTER:4,CLOSER:5,PVC:6,STEEL:7,EPDM:8,SIL:9,FOAM:10,GLAZ:11,GRP:12,CAV:13,VENT:14};
+var MLAM={1:0.77,2:0.032,4:0.57,5:0.035,6:0.17,7:50,8:0.25,9:0.35,10:0.04,11:0.035,12:0.30};
+var WALLM={1:1,2:1,3:1,4:1,5:1,9:1,10:1};
+var WINM={6:1,7:1,8:1,11:1,12:1,13:1,14:1};
+var FRAMEM={6:1,8:1,7:1,12:1};
+
+function mkEdges(segs){var e=[segs[0][0]];for(var s=0;s<segs.length;s++){var a=segs[s][0],b=segs[s][1],d=segs[s][2];var n=Math.round((b-a)/d);for(var k=1;k<=n;k++)e.push(a+k*d);}return e;}
+function makeGrid(yf){
+  var XE=mkEdges([[0,600,50],[600,900,10],[900,990,5],[990,1125,1],[1125,1325,10]]);
+  var YE=mkEdges([[0,yf-5,5],[yf-5,yf+75,1],[yf+75,335,5]]);
+  var NX=XE.length-1,NY=YE.length-1,XC=new Float64Array(NX),YC=new Float64Array(NY),DX=new Float64Array(NX),DY=new Float64Array(NY);
+  for(var i=0;i<NX;i++){XC[i]=(XE[i]+XE[i+1])/2;DX[i]=(XE[i+1]-XE[i])/1000;}
+  for(var j=0;j<NY;j++){YC[j]=(YE[j]+YE[j+1])/2;DY[j]=(YE[j+1]-YE[j])/1000;}
+  return {XE:XE,YE:YE,NX:NX,NY:NY,N:NX*NY,XC:XC,YC:YC,DX:DX,DY:DY,yf:yf};
+}
+// ISO 10077-2 style equivalent conductivity of an air cavity. d = depth along heat flow (y), b = width across it (x), mm.
+function lamEq(d_mm,b_mm,vent){
+  var d=d_mm/1000,b=b_mm/1000,C1=0.025,C2=0.73,dT=10;
+  var ha=b<0.005?C1/d:Math.max(C1/d,C2*Math.cbrt(dT));
+  var E=1/(1/0.9+1/0.9-1),F=0.5*(1+Math.sqrt(1+(d/b)*(d/b))-d/b);
+  var hr=4*5.67e-8*Math.pow(283,3)*E*F;
+  var l=d*(ha+hr);return vent?2*l:l;
+}
+function uWall(block){return 1/(RSE+0.1/LAM_BRICK+0.1/LAM_INS+0.1/block+0.015/LAM_PL+RSI);}
+function overlapOf(yf){return Math.max(0,Math.min(yf+70,Y_CAV)-Math.max(yf,Y_BRICK));}
+
+// Profile as rectangles in local coords: u from frame back (x=1010), v from frame outer face (y=yf). Painted in order.
+// Each: [u0,u1,v0,v1,mat,tag]
+function profileRects(cfg){
+  var R=[],five=cfg.chambers===5,rf=cfg.reinf;
+  function body(u0,u1,v0,v1,tag){R.push([u0,u1,v0,v1,M.PVC,tag]);}
+  function cav(u0,u1,v0,v1,tag,vent){R.push([u0,u1,v0,v1,vent?M.VENT:M.CAV,tag]);}
+  function reinf(u0,u1,v0,v1,tag){if(rf==='none')return;var m=rf==='steel'?M.STEEL:M.GRP,t=rf==='steel'?2:3;R.push([u0,u1,v0,v1,m,tag]);R.push([u0+t,u1-t,v0+t,v1-t,M.CAV,tag+' core']);}
+  // ---- outer frame ----
+  body(0,46,0,70,'frame');body(46,62,58,70,'frame stop');
+  cav(3,43,3,12,'frame drainage chamber',cfg.drained);
+  if(five){cav(3,43,14,24,'frame thermal chamber');cav(3,43,26,48,'frame reinforcement chamber');reinf(9,37,28,46,'frame reinforcement');cav(3,43,50,57,'frame thermal chamber 2');cav(3,43,59,67,'frame inner chamber');}
+  else{cav(3,43,14,48,'frame main chamber');reinf(9,37,28,46,'frame reinforcement');cav(3,43,50,67,'frame inner chamber');}
+  cav(49,59,61,67,'stop chamber');
+  // ---- rebate between frame and sash: pressure-equalised zone ----
+  cav(46,52,4,58,'pressure-equalised rebate',true);cav(52,56,55,58,'pressure-equalised rebate',true);
+  R.push([46,52,0,4,M.EPDM,'weather seal']);R.push([56,62,55,58,M.EPDM,'air seal']);
+  // ---- sash ----
+  body(52,88,0,55,'sash');body(88,112,0,6,'sash glazing leg');
+  cav(55,85,3,12,'sash drainage chamber',cfg.drained);
+  if(five){cav(55,85,14,40,'sash reinforcement chamber');reinf(60,80,16,38,'sash reinforcement');cav(55,85,42,52,'sash inner chamber');}
+  else{cav(55,85,14,52,'sash main chamber');reinf(60,80,16,38,'sash reinforcement');}
+  // glazing bead
+  body(88,112,42,55,'glazing bead');cav(91,109,45,52,'bead chamber');
+  // glazing rebate (drained and vented to outside)
+  cav(88,94,6,42,'glazing rebate',true);cav(94,100,6,11,'glazing rebate',true);cav(94,100,39,42,'glazing rebate',true);
+  R.push([100,112,6,11,M.EPDM,'outer glazing gasket']);R.push([100,112,39,42,M.EPDM,'inner glazing gasket']);
+  // glazing unit (BR 497 / ISO 10077-2: replaced by insulation panel of the same thickness)
+  R.push([94,XMAX-FX,11,39,M.GLAZ,'glazing panel']);
+  return R;
+}
+
+function buildMesh(cfg){
+  var G=makeGrid(cfg.yf),NX=G.NX,NY=G.NY,N=G.N,XE=G.XE,YE=G.YE,XC=G.XC,YC=G.YC;
+  var mat=new Uint8Array(N),lam=new Float64Array(N),cls=new Uint8Array(N),tag=new Int16Array(N).fill(-1);
+  var yf=cfg.yf,tags=[];
+  function lo(E,v){var a=0,b=E.length-1;while(a<b){var m=(a+b)>>1;if(E[m]<v)a=m+1;else b=m;}return a;}
+  function paint(x0,x1,y0,y1,m,l,t){var i0=lo(XE,x0),i1=lo(XE,x1),j0=lo(YE,y0),j1=lo(YE,y1);var ti=-1;if(t!==undefined){ti=tags.indexOf(t);if(ti<0){tags.push(t);ti=tags.length-1;}}
+    for(var j=j0;j<j1;j++)for(var i=i0;i<i1;i++){var k=j*NX+i;mat[k]=m;lam[k]=l;tag[k]=ti;}}
+  // wall
+  var blk=cfg.block;
+  paint(0,XREV,PAD,Y_BRICK,M.BRICK,0.77,'brick outer leaf');
+  paint(0,CL_X,Y_BRICK,Y_CAV,M.INS,LAM_INS,'cavity insulation');
+  paint(CL_X,XREV,Y_BRICK,Y_CAV,M.CLOSER,0.035,'insulated cavity closer');
+  paint(0,XREV,Y_CAV,Y_BLOCK,M.BLOCK,blk,'inner leaf block');
+  paint(0,XREV,Y_BLOCK,Y_FACE,M.PLASTER,0.57,'plaster');
+  paint(XREV,XREV+15,yf+70,Y_FACE,M.PLASTER,0.57,'plaster reveal');
+  // fitting gap between frame and reveal
+  if(cfg.gap==='foam'){paint(XREV,FX,yf,yf+6,M.SIL,0.35,'external silicone');paint(XREV,FX,yf+6,yf+70,M.FOAM,0.04,'low-expansion foam');}
+  else if(cfg.gap==='empty'){paint(XREV,FX,yf,yf+6,M.SIL,0.35,'external silicone');paint(XREV,FX,yf+6,yf+70,M.CAV,lamEq(64,10,false),'unfilled fitting gap');}
+  // 'open': leave as air, it connects to the outside
+  var R=profileRects(cfg);
+  for(var r=0;r<R.length;r++){var q=R[r],m=q[4],l=MLAM[m];
+    if(m===M.CAV||m===M.VENT)l=lamEq(q[3]-q[2],q[1]-q[0],m===M.VENT);
+    paint(FX+q[0],FX+q[1],yf+q[2],yf+q[3],m,l,q[5]);}
+  // classify air
+  function flood(row,c){var st=[];for(var i=0;i<NX;i++){var k=row*NX+i;if(mat[k]===0&&cls[k]===0){cls[k]=c;st.push(k);}}
+    while(st.length){var k=st.pop(),i=k%NX,j=(k-i)/NX,nb=[i>0?k-1:-1,i<NX-1?k+1:-1,j>0?k-NX:-1,j<NY-1?k+NX:-1];
+      for(var z=0;z<4;z++){var n=nb[z];if(n>=0&&mat[n]===0&&cls[n]===0){cls[n]=c;st.push(n);}}}}
+  flood(0,1);flood(NY-1,2);
+  return {G:G,mat:mat,lam:lam,cls:cls,tag:tag,tags:tags,cfg:cfg};
+}
+function windowOnly(mesh){var G=mesh.G,lam=mesh.lam.slice(),cls=mesh.cls.slice(),yf=mesh.cfg.yf;
+  for(var k=0;k<G.N;k++){var i=k%G.NX,j=(k-i)/G.NX;if(lam[k]>0&&!(WINM[mesh.mat[k]]&&G.XC[i]>FX)){lam[k]=0;cls[k]=0;}
+    if(lam[k]===0&&G.XC[i]<FX&&G.XC[i]>XREV&&G.YC[j]>yf&&G.YC[j]<yf+70)cls[k]=0;}
+  return {G:G,mat:mesh.mat,lam:lam,cls:cls};}
+
+function assemble(mesh,rsi){
+  var G=mesh.G,N=G.N,NX=G.NX,NY=G.NY,lam=mesh.lam,cls=mesh.cls,id=new Int32Array(N).fill(-1),n=0,k;
+  for(k=0;k<N;k++)if(lam[k]>0)id[k]=n++;
+  var cell=new Int32Array(n),nb=new Int32Array(n*4).fill(-1),g=new Float64Array(n*4),ft=new Uint8Array(n*4),diag=new Float64Array(n),b=new Float64Array(n);
+  for(k=0;k<N;k++){var c=id[k];if(c<0)continue;cell[c]=k;var i=k%NX,j=(k-i)/NX,la=lam[k];
+    for(var d=0;d<4;d++){var ii=i,jj=j;if(d===0)ii--;else if(d===1)ii++;else if(d===2)jj--;else jj++;
+      if(ii<0||ii>=NX||jj<0||jj>=NY)continue;
+      var k2=jj*NX+ii,hx=d<2,da=hx?G.DX[i]:G.DY[j],Lf=hx?G.DY[j]:G.DX[i],ra=da/(2*la),gg,t;
+      if(lam[k2]>0){var db=hx?G.DX[ii]:G.DY[jj];gg=Lf/(ra+db/(2*lam[k2]));nb[c*4+d]=id[k2];t=1;}
+      else{var cc=cls[k2];if(cc===1){gg=Lf/(ra+RSE);t=2;b[c]+=gg*TE;}else if(cc===2){gg=Lf/(ra+rsi);t=3;b[c]+=gg*TI;}else continue;}
+      g[c*4+d]=gg;ft[c*4+d]=t;diag[c]+=gg;}}
+  return {n:n,id:id,cell:cell,nb:nb,g:g,ft:ft,diag:diag,b:b,rsi:rsi,G:G};
+}
+// PCG with IC(0) preconditioner (natural row-major ordering: left and up neighbours are lower)
+function solve(s,x,maxIt,tol){maxIt=maxIt||6000;tol=tol||1e-9;
+  var n=s.n,nb=s.nb,g=s.g,diag=s.diag,dd=new Float64Array(n),c,o,m;
+  for(c=0;c<n;c++){var v=diag[c];o=c*4;m=nb[o];if(m>=0)v-=g[o]*g[o]/dd[m];m=nb[o+2];if(m>=0)v-=g[o+2]*g[o+2]/dd[m];dd[c]=v;}
+  var r=new Float64Array(n),z=new Float64Array(n),p=new Float64Array(n),Ap=new Float64Array(n),w=new Float64Array(n);
+  function mv(xx,yy){for(var c=0;c<n;c++){var o=c*4,v=diag[c]*xx[c],m=nb[o];if(m>=0)v-=g[o]*xx[m];m=nb[o+1];if(m>=0)v-=g[o+1]*xx[m];m=nb[o+2];if(m>=0)v-=g[o+2]*xx[m];m=nb[o+3];if(m>=0)v-=g[o+3]*xx[m];yy[c]=v;}}
+  function pre(rr,zz){for(var c=0;c<n;c++){var o=c*4,s2=rr[c],m=nb[o];if(m>=0)s2+=g[o]*w[m];m=nb[o+2];if(m>=0)s2+=g[o+2]*w[m];w[c]=s2/dd[c];}
+    for(var c2=n-1;c2>=0;c2--){var o2=c2*4,s3=0,m2=nb[o2+1];if(m2>=0)s3+=g[o2+1]*zz[m2];m2=nb[o2+3];if(m2>=0)s3+=g[o2+3]*zz[m2];zz[c2]=w[c2]+s3/dd[c2];}}
+  mv(x,Ap);var bn=0,rz=0;for(c=0;c<n;c++){r[c]=s.b[c]-Ap[c];bn+=s.b[c]*s.b[c];}bn=Math.sqrt(bn);
+  pre(r,z);for(c=0;c<n;c++){p[c]=z[c];rz+=r[c]*z[c];}
+  var it=0;for(;it<maxIt;it++){mv(p,Ap);var pAp=0;for(c=0;c<n;c++)pAp+=p[c]*Ap[c];var a=rz/pAp,rn=0;
+    for(c=0;c<n;c++){x[c]+=a*p[c];r[c]-=a*Ap[c];rn+=r[c]*r[c];}if(Math.sqrt(rn)<tol*bn)break;
+    pre(r,z);var rz2=0;for(c=0;c<n;c++)rz2+=r[c]*z[c];var be=rz2/rz;rz=rz2;for(c=0;c<n;c++)p[c]=z[c]+be*p[c];}
+  return it;}
+function initX(s,Tg){var G=s.G,x=new Float64Array(s.n);for(var c=0;c<s.n;c++){var k=s.cell[c],t=Tg?Tg[k]:NaN;
+  x[c]=isFinite(t)?t:TE+(TI-TE)*Math.min(1,Math.max(0,(G.YC[(k/G.NX)|0]-PAD)/(Y_FACE-PAD)));}return x;}
+function heatIn(s,x){var Q=0;for(var c=0;c<s.n;c++)for(var d=0;d<4;d++)if(s.ft[c*4+d]===3)Q+=s.g[c*4+d]*(TI-x[c]);return Q;}
+function coldest(s,x,mesh,set,xmin){var G=s.G,best=Infinity,bx=0,by=0;
+  for(var c=0;c<s.n;c++){var k=s.cell[c];if(!set[mesh.mat[k]])continue;var i=k%G.NX,j=(k-i)/G.NX;if(xmin&&G.XC[i]<xmin)continue;
+    for(var d=0;d<4;d++){var o=c*4+d;if(s.ft[o]!==3)continue;var Lf=d<2?G.DY[j]:G.DX[i],ts=TI-s.g[o]*(TI-x[c])/Lf*s.rsi;
+      if(ts<best){best=ts;bx=d===0?G.XE[i]:d===1?G.XE[i+1]:G.XC[i];by=d===2?G.YE[j]:d===3?G.YE[j+1]:G.YC[j];}}}
+  return {t:best,f:(best-TE)/DT,x:bx,y:by};}
+function fluxField(s,x){var G=s.G,qx=new Float32Array(G.N),qy=new Float32Array(G.N);
+  for(var c=0;c<s.n;c++){var k=s.cell[c],i=k%G.NX,j=(k-i)/G.NX,o=c*4,out=[0,0,0,0];
+    for(var d=0;d<4;d++){var t=s.ft[o+d];if(!t)continue;var gg=s.g[o+d];out[d]=t===1?gg*(x[c]-x[s.nb[o+d]]):t===3?gg*(x[c]-TI):gg*(x[c]-TE);}
+    qx[k]=(out[1]-out[0])/G.DY[j]/2;qy[k]=(out[3]-out[2])/G.DX[i]/2;}
+  return {qx:qx,qy:qy};}
+
+var UP=1/(RSE+0.028/0.035+RSI), BP=(XMAX-(FX+112))/1000, BF=0.112;
+function analyse(cfg){
+  var t0=Date.now(),mesh=buildMesh(cfg),G=mesh.G;
+  var s1=assemble(mesh,RSI),x1=initX(s1,null),it1=solve(s1,x1);
+  var T=new Float64Array(G.N).fill(NaN);for(var c=0;c<s1.n;c++)T[s1.cell[c]]=x1[c];
+  var wm=windowOnly(mesh),sw=assemble(wm,RSI),xw=initX(sw,T);solve(sw,xw);var Lw=heatIn(sw,xw)/DT;
+  var Q=heatIn(s1,x1),U=uWall(cfg.block);
+  var s2=assemble(mesh,RSI_F),x2=initX(s2,T);solve(s2,x2);
+  var cw=coldest(s2,x2,mesh,WALLM),cf=coldest(s2,x2,mesh,FRAMEM,FX);
+  var fl=fluxField(s1,x1);
+  return {cfg:cfg,T:T,qx:fl.qx,qy:fl.qy,U:U,Uf:(Lw-UP*BP)/BF,Lw:Lw,psi:Q/DT-U*(XREV/1000)-Lw,
+    wall:cw,frame:cf,overlap:overlapOf(cfg.yf),it:it1,ms:Date.now()-t0};
+}
+</script><script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const RM=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const f3=v=>v.toFixed(3),f2=v=>v.toFixed(2),f1=v=>v.toFixed(1);
+const BASE={yf:125,block:0.15,chambers:5,reinf:'steel',gap:'foam',drained:true};
+const key=c=>[c.yf,c.block,c.chambers,c.reinf,c.gap,c.drained?1:0].join('|');
+let COL={};function readColours(){const cs=getComputedStyle(document.documentElement);for(const k of ['ink','ink2','rule','pencil','fault','ok','warn','rain','air','halo'])COL[k]=cs.getPropertyValue('--'+k).trim();}
+readColours();
+
+// ---------- solver: worker if possible ----------
+const cache=new Map(),pending=new Map();let worker=null,reqId=0;const waiters={};
+try{const src=$('solverSrc').textContent+`\nonmessage=function(e){var r=analyse(e.data.cfg);postMessage({id:e.data.id,r:r},[r.T.buffer,r.qx.buffer,r.qy.buffer]);};`;
+  worker=new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})));
+  worker.onmessage=e=>{const w=waiters[e.data.id];delete waiters[e.data.id];if(w)w(e.data.r);};
+  worker.onerror=()=>{worker=null;};}catch(e){worker=null;}
+function get(cfg){const k=key(cfg);if(cache.has(k))return Promise.resolve(cache.get(k));if(pending.has(k))return pending.get(k);
+  const p=new Promise(res=>{if(worker){const id=++reqId;waiters[id]=res;worker.postMessage({id,cfg});}else setTimeout(()=>res(analyse(cfg)),20);})
+    .then(r=>{cache.set(k,r);pending.delete(k);return r;});pending.set(k,p);return p;}
+
+// ---------- world layers ----------
+const WX0=870,WX1=1235,WY0=-25,WY1=362,PPM=5,LW=(WX1-WX0)*PPM,LH=(WY1-WY0)*PPM;
+const mkC=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
+const hatchC=mkC(LW,LH),heatC=mkC(LW,LH);
+const lx=x=>Math.round((x-WX0)*PPM),ly=y=>Math.round((y-WY0)*PPM);
+const FILL={1:'#CFA08A',2:'#EAD68A',3:'#B9C0C6',4:'#ECE8DF',5:'#DDB230',6:'#FAFAF6',7:'#6B737B',8:'#2B2E33',9:'#8FA3B4',10:'#F1E2A2',11:'#BFD9E8',12:'#9DB59A',13:'#E9ECE6',14:'#CFE6EF'};
+const PAT={};
+function mkPat(size,draw){const c=mkC(size,size),p=c.getContext('2d');p.strokeStyle='#15263A';p.fillStyle='#15263A';p.lineWidth=1.2;draw(p,size);return hatchC.getContext('2d').createPattern(c,'repeat');}
+PAT[1]=mkPat(12,(p,s)=>{p.globalAlpha=.4;p.beginPath();p.moveTo(-1,s+1);p.lineTo(s+1,-1);p.moveTo(-1,1);p.lineTo(1,-1);p.moveTo(s-1,s+1);p.lineTo(s+1,s-1);p.stroke();});
+PAT[2]=mkPat(20,p=>{p.globalAlpha=.45;p.beginPath();p.moveTo(0,10);p.quadraticCurveTo(5,2,10,10);p.quadraticCurveTo(15,18,20,10);p.stroke();});
+PAT[3]=mkPat(18,(p,s)=>{p.globalAlpha=.28;p.beginPath();p.moveTo(0,0);p.lineTo(s,s);p.moveTo(s,0);p.lineTo(0,s);p.stroke();});
+PAT[4]=mkPat(7,p=>{p.globalAlpha=.4;p.fillRect(2,2,1.3,1.3);});
+PAT[5]=mkPat(11,p=>{p.globalAlpha=.55;p.beginPath();p.moveTo(0,9);p.lineTo(5.5,2);p.lineTo(11,9);p.stroke();});
+PAT[10]=mkPat(8,p=>{p.globalAlpha=.35;p.beginPath();p.arc(4,4,1.6,0,7);p.stroke();});
+PAT[14]=mkPat(6,p=>{p.globalAlpha=.35;p.fillRect(2,2,1.2,1.2);});
+PAT[11]=mkPat(14,p=>{p.globalAlpha=.2;p.beginPath();p.moveTo(0,7);p.lineTo(14,7);p.stroke();});
+const STOPS=[[0,[30,58,110]],[5,[43,122,158]],[10,[127,183,164]],[15,[235,193,90]],[20,[210,82,47]]];
+function tcol(t){t=Math.max(0,Math.min(20,t));let a=STOPS[0],b=STOPS[1];for(let s=1;s<STOPS.length;s++)if(t<=STOPS[s][0]){a=STOPS[s-1];b=STOPS[s];break;}
+  const u=(t-a[0])/(b[0]-a[0]);return `rgb(${a[1].map((v,q)=>Math.round(v+(b[1][q]-v)*u)).join(',')})`;}
+
+let mesh=null,res=null,heatReady=false,outline=null,groups={},spawn={faces:[],cum:[],Q:0};
+function inView(G){let i0=0,i1=G.NX-1,j0=0,j1=G.NY-1;for(let i=0;i<G.NX;i++){if(G.XE[i+1]<=WX0)i0=i+1;if(G.XE[i]<WX1)i1=i;}for(let j=0;j<G.NY;j++){if(G.YE[j+1]<=WY0)j0=j+1;if(G.YE[j]<WY1)j1=j;}return [i0,i1,j0,j1];}
+function buildHatch(){const G=mesh.G,[i0,i1,j0,j1]=inView(G),g=hatchC.getContext('2d');g.clearRect(0,0,LW,LH);
+  const paths={};const tagP={};const ext=new Path2D();
+  for(let j=j0;j<=j1;j++){let i=i0;while(i<=i1){const k=j*G.NX+i,m=mesh.mat[k],t=mesh.tag[k],c=mesh.cls[k];let e=i;
+      while(e+1<=i1&&mesh.mat[j*G.NX+e+1]===m&&mesh.tag[j*G.NX+e+1]===t&&mesh.cls[j*G.NX+e+1]===c)e++;
+      const x0=lx(G.XE[i]),x1=lx(G.XE[e+1]),y0=ly(G.YE[j]),y1=ly(G.YE[j+1]);
+      if(m){(paths[m]||(paths[m]=new Path2D())).rect(x0,y0,x1-x0,y1-y0);if(t>=0){const n=mesh.tags[t];(tagP[n]||(tagP[n]=new Path2D())).rect(x0,y0,x1-x0,y1-y0);}}
+      else if(c===1)ext.rect(x0,y0,x1-x0,y1-y0);
+      i=e+1;}}
+  for(const m in paths){g.fillStyle=FILL[m];g.fill(paths[m]);if(PAT[m]){g.fillStyle=PAT[m];g.fill(paths[m]);}}
+  groups=tagP;groups.__ext=ext;
+  const kk=k=>mesh.mat[k]*100+(mesh.mat[k]>=13?mesh.tag[k]%100:0);outline=new Path2D();
+  for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const k=j*G.NX+i,a=kk(k);
+    if(i<i1&&kk(k+1)!==a){outline.moveTo(lx(G.XE[i+1]),ly(G.YE[j]));outline.lineTo(lx(G.XE[i+1]),ly(G.YE[j+1]));}
+    if(j<j1&&kk(k+G.NX)!==a){outline.moveTo(lx(G.XE[i]),ly(G.YE[j+1]));outline.lineTo(lx(G.XE[i+1]),ly(G.YE[j+1]));}}}
+function buildHeat(){const G=mesh.G,[i0,i1,j0,j1]=inView(G),h=heatC.getContext('2d'),T=res.T;h.clearRect(0,0,LW,LH);
+  for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const t=T[j*G.NX+i];if(!Number.isFinite(t))continue;h.fillStyle=tcol(t);h.fillRect(lx(G.XE[i]),ly(G.YE[j]),lx(G.XE[i+1])-lx(G.XE[i])+1,ly(G.YE[j+1])-ly(G.YE[j])+1);}
+  h.lineWidth=1.3;h.strokeStyle='rgba(255,255,255,.55)';h.beginPath();
+  for(let L=1;L<20;L++)for(let j=j0;j<j1;j++)for(let i=i0;i<i1;i++){const a=T[j*G.NX+i],b=T[j*G.NX+i+1],c=T[(j+1)*G.NX+i+1],d=T[(j+1)*G.NX+i];
+    if(!(Number.isFinite(a)&&Number.isFinite(b)&&Number.isFinite(c)&&Number.isFinite(d)))continue;const code=(a>=L?1:0)|(b>=L?2:0)|(c>=L?4:0)|(d>=L?8:0);if(code===0||code===15)continue;
+    const x0=G.XC[i],x1=G.XC[i+1],y0=G.YC[j],y1=G.YC[j+1];
+    const P={t:[x0+(L-a)/(b-a)*(x1-x0),y0],r:[x1,y0+(L-b)/(c-b)*(y1-y0)],b:[x0+(L-d)/(c-d)*(x1-x0),y1],l:[x0,y0+(L-a)/(d-a)*(y1-y0)]};
+    const S={1:'lt',2:'tr',3:'lr',4:'rb',5:'ltrb',6:'tb',7:'lb',8:'bl',9:'tb',10:'trbl',11:'rb',12:'rl',13:'tr',14:'lt'}[code];
+    for(let s=0;s<S.length;s+=2){const p=P[S[s]],q=P[S[s+1]];h.moveTo((p[0]-WX0)*PPM,(p[1]-WY0)*PPM);h.lineTo((q[0]-WX0)*PPM,(q[1]-WY0)*PPM);}}
+  h.stroke();
+  const s=assemble(mesh,RSI),faces=[],cum=[];let Q=0;const G2=G;
+  for(let c=0;c<s.n;c++){const k=s.cell[c],i=k%G2.NX,j=(k-i)/G2.NX;const t=T[k];
+    for(let d=0;d<4;d++){const o=c*4+d;if(s.ft[o]!==3)continue;const w=s.g[o]*(TI-t);if(w<=0||G2.XE[i+1]<WX0)continue;Q+=w;cum.push(Q);
+      faces.push(d<2?{x:d===0?G2.XE[i]+.2:G2.XE[i+1]-.2,y0:G2.YE[j],y1:G2.YE[j+1]}:{y:d===2?G2.YE[j]+.2:G2.YE[j+1]-.2,x0:G2.XE[i],x1:G2.XE[i+1]});}}
+  spawn={faces,cum,Q};parts.length=0;}
+function setMesh(cfg){mesh=buildMesh(cfg);buildHatch();heatReady=false;}
+function setRes(r){if(key(r.cfg)!==key(mesh.cfg))return;res=r;buildHeat();heatReady=true;}
+
+// ---------- particles ----------
+const parts=[];
+function bs(E,v){let a=0,b=E.length-2;while(a<b){const m=(a+b+1)>>1;if(E[m]<=v)a=m;else b=m-1;}return a;}
+function stepParts(dt){if(!heatReady||S.heatA<.3||RM){parts.length=0;return;}const G=mesh.G;
+  const n=spawn.Q*30*dt;let k=Math.floor(n)+(Math.random()<n%1?1:0);
+  while(k-->0&&parts.length<700){const r=Math.random()*spawn.Q;let lo=0,hi=spawn.cum.length-1;while(lo<hi){const m=(lo+hi)>>1;if(spawn.cum[m]<r)lo=m+1;else hi=m;}
+    const f=spawn.faces[lo];if(f)parts.push({x:f.x!==undefined?f.x:f.x0+Math.random()*(f.x1-f.x0),y:f.y!==undefined?f.y:f.y0+Math.random()*(f.y1-f.y0),h:[],age:0});}
+  for(let p=parts.length-1;p>=0;p--){const P=parts[p];P.age+=dt;if(P.x<0||P.x>=XMAX||P.y<0||P.y>=335||P.age>9){parts.splice(p,1);continue;}
+    const kk=bs(G.YE,P.y)*G.NX+bs(G.XE,P.x);if(!(mesh.lam[kk]>0)){parts.splice(p,1);continue;}
+    let vx=res.qx[kk]*9,vy=res.qy[kk]*9;const sp=Math.hypot(vx,vy),mx=S.zoom>2.5?90:240;if(sp>mx){vx*=mx/sp;vy*=mx/sp;}
+    P.h.push(P.x,P.y);if(P.h.length>12)P.h.splice(0,2);P.x+=vx*dt;P.y+=vy*dt;}}
+
+// ---------- view ----------
+const cv=$('view'),ctx=cv.getContext('2d');let W=600,H=480,dpr=1;
+const VIEWS={close:yf=>[992,yf-16,1130,yf+86],fix:yf=>[985,yf-16,1135,Math.max(yf+150,262)],wide:()=>[880,-22,1228,358]};
+const S={heatA:0,heatT:0,v:[880,-22,1228,358],vFrom:null,vTo:null,vt:1,zoom:1,focus:'',focusA:0,t:0,draw:1,viewName:'close'};
+function fit(v){const vw=v[2]-v[0],vh=v[3]-v[1],s=Math.min(W/vw,H/vh);return {s,ox:(W-vw*s)/2,oy:(H-vh*s)/2,x0:v[0],y0:v[1]};}
+let F=null;const X=x=>F.ox+(x-F.x0)*F.s,Y=y=>F.oy+(y-F.y0)*F.s;
+function setView(name,instant){S.viewName=name;const tgt=VIEWS[name](mesh?mesh.cfg.yf:125);if(instant||RM){S.v=tgt;S.vt=1;return;}S.vFrom=S.v.slice();S.vTo=tgt;S.vt=0;}
+function resize(){W=cv.parentElement.clientWidth;H=Math.round(Math.min(W*0.82,window.innerHeight*0.56));dpr=Math.min(2.5,window.devicePixelRatio||1);cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';}
+function world(){ctx.setTransform(dpr*F.s,0,0,dpr*F.s,dpr*(F.ox-F.x0*F.s),dpr*(F.oy-F.y0*F.s));}
+function label(t,x,y,o={}){ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.font=`${o.w||600} ${o.size||12.5}px "Barlow Semi Condensed","Arial Narrow",sans-serif`;ctx.textAlign=o.align||'left';ctx.textBaseline='middle';
+  const tw=ctx.measureText(t).width,al=o.align||'left';
+  if(al==='left'&&x+tw>W-4)x=W-4-tw;if(al==='right'&&x-tw<4)x=4+tw;if(al==='left'&&x<4)x=4;if(al==='center')x=Math.min(W-4-tw/2,Math.max(4+tw/2,x));y=Math.min(H-8,Math.max(8,y));
+  ctx.lineJoin='round';ctx.lineWidth=3.5;ctx.strokeStyle=o.halo||'#F3F6F1';ctx.strokeText(t,x,y);ctx.fillStyle=o.col||'#15263A';ctx.fillText(t,x,y);ctx.restore();}
+function leader(t,wx,wy,dx,dy,o={}){const x=X(wx),y=Y(wy),tx=x+dx,ty=y+dy;ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.strokeStyle=o.col||'#15263A';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(tx,ty);ctx.stroke();
+  ctx.fillStyle=o.col||'#15263A';ctx.beginPath();ctx.arc(x,y,2.2,0,7);ctx.fill();ctx.restore();label(t,tx+(dx>=0?3:-3),ty,{...o,align:dx>=0?'left':'right'});}
+function hl(names,fill,stroke,alpha){world();ctx.globalAlpha=alpha;for(const n of names){const p=groups[n];if(!p)continue;ctx.save();ctx.scale(1/PPM,1/PPM);ctx.translate(WX0*PPM,WY0*PPM);
+  if(fill){ctx.fillStyle=fill;ctx.fill(p);}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2.2*PPM/F.s;ctx.stroke(p);}ctx.restore();}ctx.globalAlpha=1;}
+
+// ---------- chapter overlays ----------
+const FXu=u=>FX+u;
+const OVER={
+ anatomy(a,yf){const s=W<480;
+  leader('Outer frame',FXu(23),yf+8,-10,-30+0,{});leader('Sash',FXu(70),yf+8,6,-28);leader('Sealed unit',FXu(118),yf+25,s?-4:10,s?-52:-40);
+  leader('Glazing bead',FXu(100),yf+50,14,36);leader('Steel',FXu(23),yf+37,-40,34);leader('Fitting gap',1005,yf+40,-44,-8);leader('Cavity closer',985,yf+25,-30,-56);},
+ pressure(a,yf){const p=0.5+0.5*Math.sin(S.t*3.2);
+  world();ctx.save();ctx.scale(1/PPM,1/PPM);ctx.translate(WX0*PPM,WY0*PPM);ctx.globalAlpha=a*(0.12+0.28*p);ctx.fillStyle='#2F78B7';ctx.fill(groups.__ext);ctx.restore();ctx.globalAlpha=1;
+  hl(['pressure-equalised rebate','frame drainage chamber','sash drainage chamber','glazing rebate'],'#2F78B7',null,a*(0.2+0.45*p));
+  hl(['weather seal','outer glazing gasket'],null,COL.rain,a);hl(['air seal','inner glazing gasket'],'#2C8A5A',COL.air,a);
+  // rain
+  world();ctx.strokeStyle='rgba(47,120,183,'+(0.8*a)+')';ctx.lineWidth=1.3/F.s;ctx.beginPath();
+  for(let q=0;q<14;q++){const x=FXu(4+q*8.3),ph=((S.t*0.9+q*0.37)%1),y=yf-15+ph*15;ctx.moveTo(x,y);ctx.lineTo(x+0.6,y+2.5);}ctx.stroke();
+  // wind chevrons
+  for(let q=0;q<3;q++){const x=FXu(20+q*40),y=yf-11+Math.sin(S.t*3.2+q)*1.5;ctx.beginPath();ctx.moveTo(x-3,y-2);ctx.lineTo(x,y+1);ctx.lineTo(x+3,y-2);ctx.lineWidth=1.6/F.s;ctx.strokeStyle='rgba(47,120,183,'+a+')';ctx.stroke();}
+  const o={col:COL.rain};leader('Rain screen',FXu(49),yf+2,24,-16,o);leader('Pressure-equalised rebate',FXu(49),yf+30,-60,-24,o);
+  leader('Air seal on the warm side',FXu(59),yf+56.5,28,26,{col:COL.air});leader('Drained glazing rebate',FXu(91),yf+24,22,-6,o);},
+ drain(a,yf){hl(['frame drainage chamber','sash drainage chamber','glazing rebate','pressure-equalised rebate'],'#2F78B7',COL.rain,a*0.5);
+  const o={col:COL.rain};leader('Drained chambers: vented, so λ counts double',FXu(24),yf+7,-6,-36,o);
+  world();ctx.fillStyle='rgba(47,120,183,'+a+')';for(let q=0;q<3;q++){const ph=(S.t*0.6+q/3)%1;ctx.beginPath();ctx.arc(FXu(10+q*14),yf+6+ph*4,0.9,0,7);ctx.fill();}},
+ thermal(a,yf){const R=profileRects(mesh.cfg);ctx.globalAlpha=a;
+  for(const q of R){if(q[4]!==M.CAV&&q[4]!==M.VENT)continue;if(!/chamber$|chamber 2$/.test(q[5]))continue;const l=lamEq(q[3]-q[2],q[1]-q[0],q[4]===M.VENT);
+    label(l.toFixed(3),X(FXu((q[0]+q[1])/2)),Y(yf+(q[2]+q[3])/2),{size:10.5,w:600,align:'center'});}ctx.globalAlpha=1;
+  label('Chamber λeq, W/mK',X(FXu(2)),Y(yf-9),{size:11.5,col:COL.ink2});},
+ fixing(a,yf){hl(['frame reinforcement','sash reinforcement'],null,COL.fault,a);
+  // screw into frame steel and strap to inner leaf
+  world();ctx.globalAlpha=a;ctx.strokeStyle='#15263A';ctx.lineCap='round';
+  const sy=yf+37,by=Math.max(yf+95,250);ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(1004,sy);ctx.lineTo(FXu(24),sy);ctx.stroke();
+  ctx.lineWidth=2.2;ctx.strokeStyle='#5A6470';ctx.beginPath();ctx.moveTo(1008.5,sy-4);ctx.lineTo(1008.5,by+4);ctx.stroke();
+  ctx.strokeStyle='#15263A';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(1012,by);ctx.lineTo(955,by);ctx.stroke();ctx.globalAlpha=1;
+  leader('Screws bite into the steel',FXu(22),sy,30,-40,{col:COL.fault});leader('Strap to the inner leaf',1008.5,(sy+by)/2+10,-40,4);
+  leader('Plugged screw into block, not the closer',975,by,-10,-16);},
+ seal(a,yf){hl(['external silicone'],'#15263A',null,a*0.5);hl(['low-expansion foam','unfilled fitting gap'],'#D39E00',null,a*0.35);
+  hl(['weather seal','air seal','outer glazing gasket','inner glazing gasket'],null,COL.pencil,a);
+  world();ctx.globalAlpha=a;ctx.strokeStyle='#D96A16';ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(1000,yf+71);ctx.lineTo(1015,yf+71);ctx.stroke();ctx.globalAlpha=1;
+  leader('External silicone',1005,yf+3,-34,-24);leader('Foam fills the fitting gap',1005,yf+30,-50,0);leader('Airtightness tape or sealant',1008,yf+71,-40,26);
+  leader('EPDM gaskets',FXu(106),yf+8.5,20,-26);},
+ junction(){},
+};
+
+// ---------- render ----------
+let last=performance.now();
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;S.t+=dt;
+  S.heatA+=((heatReady?S.heatT:0)-S.heatA)*Math.min(1,dt*(RM?20:2.6));S.focusA=Math.min(1,S.focusA+dt*1.5);
+  if(S.draw<1)S.draw=RM?1:Math.min(1,S.draw+dt/1.6);
+  if(S.vt<1){S.vt=Math.min(1,S.vt+dt/1.3);const e=S.vt<.5?2*S.vt*S.vt:1-Math.pow(-2*S.vt+2,2)/2;S.v=S.vFrom.map((v,q)=>v+(S.vTo[q]-v)*e);}
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#F3F6F1';ctx.fillRect(0,0,W,H);
+  if(mesh){F=fit(S.v);S.zoom=F.s;const yf=mesh.cfg.yf;
+    ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);if(S.draw<1){ctx.beginPath();ctx.rect(0,0,W*S.draw,H);ctx.clip();}
+    ctx.imageSmoothingEnabled=true;
+    const sc=dpr*F.s/PPM,ox=dpr*(F.ox+(WX0-F.x0)*F.s),oy=dpr*(F.oy+(WY0-F.y0)*F.s);
+    ctx.setTransform(sc,0,0,sc,ox,oy);ctx.drawImage(hatchC,0,0);if(S.heatA>.01){ctx.globalAlpha=S.heatA;ctx.drawImage(heatC,0,0);ctx.globalAlpha=1;}
+    ctx.strokeStyle='#15263A';ctx.lineWidth=Math.max(1,PPM*0.9/F.s);ctx.globalAlpha=.8;ctx.stroke(outline);ctx.globalAlpha=1;
+    stepParts(dt);if(parts.length){world();ctx.globalAlpha=Math.min(1,(S.heatA-.3)/.5);ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=1.4/F.s;ctx.lineCap='round';ctx.beginPath();
+      for(const P of parts){const h=P.h;if(h.length<2)continue;ctx.moveTo(h[0],h[1]);for(let q=2;q<h.length;q+=2)ctx.lineTo(h[q],h[q+1]);ctx.lineTo(P.x,P.y);}ctx.stroke();ctx.globalAlpha=1;}
+    ctx.restore();
+    if(S.draw>=1&&OVER[S.focus])OVER[S.focus](S.focusA,yf);
+    label('Outside, 0 °C',W-8,12,{size:12.5,col:'#4B5C6D',align:'right'});label('Inside, 20 °C',8,H-12,{size:12.5,col:'#4B5C6D'});
+    if(heatReady&&S.heatA>.5&&res){for(const [c,nm] of [[res.wall,'reveal'],[res.frame,'frame']]){const x=X(c.x),y=Y(c.y);if(x<0||x>W||y<0||y>H)continue;const bad=nm==='reveal'&&c.f<0.75;
+      ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.strokeStyle=bad?'#BF3A2B':'#15263A';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,6,0,7);ctx.stroke();ctx.restore();
+      label(`${nm} ${f1(c.t)} °C`,x+(nm==='frame'?10:-10),y+16,{size:12,col:bad?'#BF3A2B':'#15263A',align:nm==='frame'?'left':'right'});}}
+    if(!heatReady&&S.heatT>0)label('Solving',W-8,14,{size:11.5,align:'right',w:500,col:'#4B5C6D'});
+    // scale bar
+    const sb=S.zoom>2.5?10:50;const bx=W*0.42,by=H-12;ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.strokeStyle='#15263A';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(bx,by-3);ctx.lineTo(bx,by);ctx.lineTo(bx+sb*F.s,by);ctx.lineTo(bx+sb*F.s,by-3);ctx.stroke();ctx.restore();
+    label(sb+' mm',bx-4,by-2,{size:11,align:'right',w:500});}
+  requestAnimationFrame(frame);}
+
+// ---------- chapters ----------
+const T=(r)=>`Frame Uf <b>${f2(r.Uf)} W/m²K</b>, installation ψ <b>${f3(r.psi)} W/mK</b>`;
+const CH=[
+ {t:'A uPVC casement, chamber by chamber',cfg:{},view:'close',heat:false,focus:'anatomy',draw:true,
+  s:'Plan section through the jamb of a representative 70 mm outward-opening casement: outer frame against the reveal, sash beside it, sealed unit held in by an internal bead. Everything hollow is a chamber the extruder had to design for a reason.',
+  d:async r=>`The frame sits over the insulated cavity closer with a ${r.overlap} mm overlap, as in the first model.`},
+ {t:'Keeping water out: pressure equalisation',cfg:{},view:'close',heat:false,focus:'pressure',
+  s:'Wind pushes rain at the window. The outer gasket is only a rain screen. Behind it the rebate is vented to outside through slots in the bottom run, so its pressure rises and falls with each gust. With no pressure difference across the rain screen, water is not pushed in.',
+  d:async()=>'The pressure drop happens across the inner air seal on the warm side, where there is no water to drive through. That is why the airtight line sits inboard of the drainage.'},
+ {t:'Drainage chambers',cfg:{},view:'close',heat:false,focus:'drain',
+  s:'Water that passes the rain screen collects in the front chambers and the glazing rebate, then drains out through slots at the bottom. These spaces are connected to outside air, so they are cold and count as ventilated cavities.',
+  d:async r=>{const u=await get({...BASE,drained:false});return `Sealing them would drop Uf from <b>${f2(r.Uf)}</b> to <b>${f2(u.Uf)} W/m²K</b>, and the window would leak. Drainage wins, and the thermal chambers have to sit behind it.`;}},
+ {t:'Thermal chambers',cfg:{},view:'close',heat:true,focus:'thermal',
+  s:'Behind the drainage the profile is split into small sealed chambers. Each one is replaced here by an equivalent conductivity worked out from its size: narrow chambers stop air circulating and webs block radiation across them.',
+  d:async r=>{const u=await get({...BASE,chambers:3});return `With 5 chambers Uf is <b>${f2(r.Uf)}</b>; merge them into 3 larger chambers and it rises to <b>${f2(u.Uf)} W/m²K</b>. More webs also means more PVC paths, so there is a limit.`;}},
+ {t:'Fixing zone: steel in the middle',cfg:{},view:'fix',heat:true,focus:'fixing',
+  s:'The central chambers carry galvanised steel. It stiffens long frames against wind load, and it is what fixing screws, hinges and handle screws bite into. With the frame over the cavity, fixings go through a strap into the inner leaf, not into the closer.',
+  d:async r=>{const g=await get({...BASE,reinf:'grp'}),n=await get({...BASE,reinf:'none'});return `Steel Uf <b>${f2(r.Uf)}</b>, glass-fibre composite <b>${f2(g.Uf)}</b>, unreinforced <b>${f2(n.Uf)} W/m²K</b>. Steel costs about ${Math.round((r.Uf/n.Uf-1)*100)} % on Uf, which is why better systems use composite or thermally broken reinforcement.`;}},
+ {t:'Sealant zones',cfg:{},view:'fix',heat:true,focus:'seal',
+  s:'The profile gives sealants places to sit: EPDM gaskets for the glass and sash, a flat back face for perimeter silicone, and a fitting gap sized for foam. An airtightness tape or sealant closes the gap on the room side.',
+  d:async r=>{const e=await get({...BASE,gap:'empty'});return `Filled with foam, installation ψ is <b>${f3(r.psi)}</b>; leave the gap empty behind the silicone and it roughly doubles to <b>${f3(e.psi)} W/mK</b>.`;}},
+ {t:'The real profile in the wall',cfg:{},view:'wide',heat:true,focus:'junction',
+  s:'The whole jamb solved together: brick, cavity, closer, block, plaster return and the full profile. Colour is temperature, white lines are 1 °C isotherms, streaks are heat leaving the room.',
+  d:async r=>`${T(r)}. The simplified frame block in the first model gave 0.014, so the real profile changes little when the frame sits over the cavity. Reveal fRsi ${f2(r.wall.f)}, frame fRsi ${f2(r.frame.f)}.`},
+ {t:'Fault: fitting gap left open',cfg:{gap:'open'},view:'wide',heat:true,focus:'junction',
+  s:'No foam and no external silicone. Outside air runs straight down the side of the frame to the back of the plaster reveal.',
+  d:async r=>`${T(r)}. The reveal falls to <b>${f1(r.wall.t)} °C</b>, fRsi ${f2(r.wall.f)}: <span class="bad">mould on the reveal</span>, and the frame's own Uf has not changed at all. Installation, not the product, failed.`},
+ {t:'Fault: frame flush with the brick face',cfg:{yf:10},view:'wide',heat:true,focus:'junction',
+  s:'The same good profile, set forward in the outer leaf. The drainage and thermal chambers still work, but the insulation line of the wall no longer meets the frame.',
+  d:async r=>`${T(r)}. Reveal ${f1(r.wall.t)} °C, fRsi ${f2(r.wall.f)}${r.wall.f<0.75?', <span class="bad">below 0.75</span>':''}. A better profile cannot fix a bad position.`},
+];
+let chapter=0,playing=!RM,autoTimer=null,navTok=0,labMode=false;
+const pips=$('pips');CH.forEach((c,i)=>{const b=document.createElement('button');b.className='pip';b.textContent=i+1;b.setAttribute('aria-label',`Step ${i+1}: ${c.t}`);b.onclick=()=>{setPlaying(false);show(i);};pips.appendChild(b);});
+function setPlaying(p,ended){playing=p;$('play').textContent=p?'Pause':ended?'Replay':'Play';if(!p)clearTimeout(autoTimer);}
+async function apply(cfg,tok){if(!mesh||key(mesh.cfg)!==key(cfg))setMesh(cfg);const r=await get(cfg);if(tok!==navTok)return null;setRes(r);showReadouts(r);return r;}
+function show(i){chapter=i;labMode=false;const c=CH[i],tok=++navTok;clearTimeout(autoTimer);const cfg={...BASE,...c.cfg};
+  $('chNum').textContent=`${i+1} of ${CH.length}`;$('chTitle').textContent=c.t;$('chText').textContent=c.s;$('chDyn').innerHTML='';
+  [...pips.children].forEach((b,k)=>{if(k===i)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
+  if(!mesh||key(mesh.cfg)!==key(cfg))setMesh(cfg);
+  S.heatT=c.heat?1:0;S.focus=c.focus;S.focusA=0;if(c.draw&&!RM)S.draw=0;setView(c.view);syncLab(cfg);
+  apply(cfg,tok).then(async r=>{if(!r)return;const txt=await c.d(r);if(tok!==navTok)return;$('chDyn').innerHTML=txt;
+    if(playing)autoTimer=setTimeout(()=>{if(chapter<CH.length-1)show(chapter+1);else setPlaying(false,true);},11000);});}
+$('play').onclick=()=>{if(playing)setPlaying(false);else{const re=labMode||$('play').textContent==='Replay';setPlaying(true);show(re?0:chapter);}};
+$('prev').onclick=()=>{setPlaying(false);show(Math.max(0,chapter-1));};
+$('next').onclick=()=>{setPlaying(false);show(Math.min(CH.length-1,chapter+1));};
+$('vClose').onclick=()=>setView('close');$('vWide').onclick=()=>setView('wide');
+
+function showReadouts(r){$('rUf').textContent=f2(r.Uf);
+  $('rPsi').textContent=f3(r.psi);$('rPsi').className='v '+(r.psi<=0.05?'good':r.psi<=0.1?'meh':'bad');$('sPsi').textContent=r.psi<=0.05?'W/mK, within the 0.05 reference':`W/mK, ${(r.psi/0.05).toFixed(1)}× the 0.05 reference`;
+  $('rFw').textContent=f2(r.wall.f);$('rFw').className='v '+(r.wall.f>=0.75?'good':'bad');$('sFw').textContent=`${f1(r.wall.t)} °C, ${r.wall.f>=0.75?'passes 0.75':'fails 0.75'}`;
+  $('rFf').textContent=f2(r.frame.f);$('sFf').textContent=`${f1(r.frame.t)} °C on the frame`;}
+
+// ---------- lab ----------
+const ctl={pos:$('pos'),chambers:$('chambers'),reinf:$('reinf'),drained:$('drained'),gap:$('gap'),block:$('block')};
+const posText=yf=>`outer face ${yf-10} mm behind the brick face, ${overlapOf(yf)} mm over the cavity`;
+function syncLab(c){ctl.pos.value=c.yf;ctl.chambers.value=String(c.chambers);ctl.reinf.value=c.reinf;ctl.drained.value=c.drained?'1':'0';ctl.gap.value=c.gap;ctl.block.value=String(c.block);$('oPos').textContent=posText(c.yf);}
+const labCfg=()=>({yf:+ctl.pos.value,block:+ctl.block.value,chambers:+ctl.chambers.value,reinf:ctl.reinf.value,gap:ctl.gap.value,drained:ctl.drained.value==='1'});
+let labT=null;
+function labChange(){const c=labCfg();$('oPos').textContent=posText(c.yf);
+  if(!labMode){labMode=true;setPlaying(false);$('chNum').textContent='Your detail';$('chTitle').textContent='Custom profile';$('chText').textContent='Set from the controls below.';[...pips.children].forEach(b=>b.removeAttribute('aria-current'));S.focus='junction';S.heatT=1;}
+  clearTimeout(labT);labT=setTimeout(()=>{const tok=++navTok;setMesh(c);if(S.viewName!=='wide')setView(S.viewName);$('labStatus').textContent='Solving…';const t0=performance.now();
+    apply(c,tok).then(r=>{if(!r)return;$('chDyn').innerHTML=`${T(r)}. Reveal ${f1(r.wall.t)} °C (fRsi ${f2(r.wall.f)}), frame ${f1(r.frame.t)} °C (fRsi ${f2(r.frame.f)}).`;$('labStatus').textContent=`Solved in ${Math.round(performance.now()-t0)} ms.`;});},120);}
+for(const k in ctl)ctl[k].addEventListener(k==='pos'?'input':'change',labChange);
+
+// ---------- boot ----------
+new ResizeObserver(resize).observe(cv.parentElement);resize();
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColours);
+setPlaying(!RM);requestAnimationFrame(frame);
+setMesh(BASE);setView('close',true);show(0);
+// warm the cache for the comparisons used in the story
+get({...BASE,drained:false});get({...BASE,chambers:3});get({...BASE,reinf:'grp'});get({...BASE,reinf:'none'});get({...BASE,gap:'empty'});get({...BASE,gap:'open'});get({...BASE,yf:10});
+})();
+</script></body></html>

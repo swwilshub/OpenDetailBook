@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>The Pattern Book: building details with the physics inside</title>
+<meta name="description" content="Interactive building physics explainers with live heat-flow calculations: window junctions, cavity closers, ψ-values, fRsi and uPVC profiles.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪟</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--paper:#E4E9E3;--sheet:#F3F6F1;--ink:#15263A;--ink2:#4B5C6D;--rule:#B5C0B8;--pencil:#D39E00;--cold:#2B7A9E;--warm:#D2522F}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0F161D;--sheet:#16202A;--ink:#E2E8E3;--ink2:#9BA9B4;--rule:#2D3A45;--pencil:#F2C232}}
+:root[data-theme="dark"]{--paper:#0F161D;--sheet:#16202A;--ink:#E2E8E3;--ink2:#9BA9B4;--rule:#2D3A45;--pencil:#F2C232}
+*,*::before,*::after{box-sizing:inherit}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Barlow,"Segoe UI",system-ui,-apple-system,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:0 18px}
+header{padding:48px 0 18px}
+.kicker{font-family:"Barlow Semi Condensed",sans-serif;font-weight:600;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin:0 0 6px}
+h1{font-family:"Barlow Semi Condensed","Arial Narrow",sans-serif;font-weight:700;font-size:clamp(46px,11vw,92px);line-height:.92;margin:0;letter-spacing:-.02em}
+.line{display:block;width:100%;max-width:520px;height:26px;margin:10px 0 14px}
+.line path{fill:none;stroke-width:4;stroke-linecap:round}
+.line .ok{stroke:var(--pencil);stroke-dasharray:600;stroke-dashoffset:600;animation:draw 1.8s .2s ease-out forwards}
+.line .gap{stroke:var(--warm);stroke-dasharray:6 6;opacity:0;animation:fade .4s 1.9s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}@keyframes fade{to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.line .ok{animation:none;stroke-dashoffset:0}.line .gap{animation:none;opacity:1}}
+.lede{font-size:19px;max-width:58ch;margin:0;color:var(--ink)}
+.lede span{color:var(--ink2)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin:28px 0 8px}
+.filters button{font:500 14px Barlow,sans-serif;color:var(--ink);background:transparent;border:1px solid var(--rule);border-radius:999px;padding:6px 13px;min-height:36px;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+h2.ch{font-family:"Barlow Semi Condensed",sans-serif;font-weight:700;font-size:28px;margin:34px 0 0;padding-top:10px;border-top:1.5px solid var(--ink);display:flex;gap:12px;align-items:baseline}h2.ch small{font-size:15px;font-weight:600;color:var(--ink2)}
+.soon{color:var(--ink2);font-size:15px;margin:8px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:22px;margin:14px 0 10px;padding:0;list-style:none}
+.demo{display:flex;flex-direction:column;background:var(--sheet);border:1px solid var(--rule);border-radius:3px;overflow:hidden;color:inherit;text-decoration:none;transition:transform .15s ease,border-color .15s ease}
+.demo:hover{transform:translateY(-2px);border-color:var(--ink2)}
+.demo:focus-visible{outline:2px solid var(--pencil);outline-offset:3px}
+.demo img{display:block;width:100%;height:auto;aspect-ratio:640/397;object-fit:cover;background:#F3F6F1;border-bottom:1px solid var(--rule)}
+.body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.num{font-family:"Barlow Semi Condensed",sans-serif;font-weight:600;color:var(--ink2);font-size:13.5px;font-variant-numeric:tabular-nums}
+.demo h2{font-family:"Barlow Semi Condensed",sans-serif;font-weight:700;font-size:23px;line-height:1.12;margin:0}
+.demo p{margin:0;color:var(--ink2);font-size:15px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto;padding-top:8px}
+.tags span{font-size:12.5px;border:1px solid var(--rule);border-radius:2px;padding:1px 7px;color:var(--ink2)}
+.go{font-weight:600;font-size:14.5px;margin-top:6px}
+.go::after{content:" →"}
+section.about{border-top:1.5px solid var(--ink);margin-top:44px;padding:18px 0 8px;display:grid;grid-template-columns:1fr 1fr;gap:10px 40px}
+@media (max-width:700px){section.about{grid-template-columns:1fr}}
+.about h3{font-family:"Barlow Semi Condensed",sans-serif;font-size:19px;margin:0 0 4px}
+.about p{margin:0 0 12px;max-width:60ch;font-size:15.5px}
+footer{padding:14px 0 44px;font-size:13.5px;color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<p class="kicker">Building details, with the physics inside</p>
+<h1>The Pattern Book</h1>
+<svg class="line" viewBox="0 0 520 26" aria-hidden="true"><path class="ok" d="M4 18 H250 Q262 18 268 8 H516"/><path class="gap" d="M300 22 H360"/></svg>
+<p class="lede">A modern pattern book of UK construction details. <span>Each demo runs a real two-dimensional heat-flow calculation in your browser, so the ψ-values, fRsi and surface temperatures are worked out, not illustrated.</span></p>
+<div class="filters" role="group" aria-label="Filter demos" id="filters"></div>
+</header>
+
+<main>
+<div id="book"></div>
+</main>
+
+<section class="about">
+<div>
+<h3>What the numbers are</h3>
+<p>ψ is the extra heat lost per metre of junction. fRsi is the coldest inside surface temperature as a fraction of the inside to outside difference; 0.75 is the usual line for mould risk in UK dwellings. Calculations follow BR 497 and ISO 10077-2 conventions, simplified for teaching.</p>
+</div>
+<div>
+<h3>Use with care</h3>
+<p>These are explainers, not compliance calculations. Geometry and materials are representative, and references to regulations are paraphrased. For SAP, Part L or a warranty sign-off, get a product-specific calculation from a competent assessor.</p>
+</div>
+</section>
+<footer>Every page is a single, self-contained HTML file and works offline once downloaded.</footer>
+</div>
+<script>
+// Add a detail: drop the HTML in /demos, a 640×397 thumbnail in /thumbs, and add one entry here with its chapter.
+const DEMOS=[
+ {chapter:'Windows and doors',file:'demos/window-jamb.html',thumb:'thumbs/window-jamb.webp',title:'Why the window sits over the cavity',
+  blurb:'A window jamb in plan. Move the frame and the cavity closer and watch ψ and reveal temperature change, with a full position sweep.',tags:['Windows','Cavity walls','ψ-value','fRsi']},
+ {chapter:'Windows and doors',file:'demos/window-jamb-3d.html',thumb:'thumbs/window-jamb-3d.webp',title:'The window jamb in 3D',
+  blurb:'The same calculation as a 3D wall slice. The reveal is coloured by surface temperature, like a thermal camera.',tags:['Windows','Cavity walls','3D','fRsi']},
+ {chapter:'Windows and doors',file:'demos/upvc-profile.html',thumb:'thumbs/upvc-profile.webp',title:'Inside a uPVC window profile',
+  blurb:'A 70 mm casement chamber by chamber: pressure equalisation, drainage, thermal chambers, steel, fixings and sealants, with Uf and installation ψ.',tags:['Windows','uPVC','Uf-value','ψ-value']},
+];
+const CHAPTERS=[['Windows and doors','How openings meet the wall, and what the frame itself is doing'],['Walls','Build-ups, cavities, ties and insulation continuity'],['Roofs','Eaves, verges, ridges and loft insulation'],['Floors','Ground floors, edge insulation and the wall-to-floor junction']];
+const book=document.getElementById('book'),filters=document.getElementById('filters');
+const all=['All',...new Set(DEMOS.flatMap(d=>d.tags))];let active='All';
+function render(){book.innerHTML='';let n=0;CHAPTERS.forEach(([ch,sub],ci)=>{const items=DEMOS.filter(d=>d.chapter===ch);
+  const shown=items.filter(d=>active==='All'||d.tags.includes(active));if(active!=='All'&&!shown.length)return;
+  const h=document.createElement('h2');h.className='ch';h.innerHTML=`<small>Chapter ${ci+1}</small>${ch}`;book.appendChild(h);
+  if(!items.length){const p=document.createElement('p');p.className='soon';p.textContent=sub+'. In preparation.';book.appendChild(p);return;}
+  const ul=document.createElement('ul');ul.className='grid';book.appendChild(ul);
+  items.forEach(d=>{const num=`${ci+1}.${items.indexOf(d)+1}`;if(!shown.includes(d))return;const li=document.createElement('li');li.innerHTML=`<a class="demo" href="${d.file}">
+  <img src="${d.thumb}" alt="" loading="lazy" width="640" height="397">
+  <div class="body"><span class="num">Detail ${num}</span><h2>${d.title}</h2><p>${d.blurb}</p>
+  <div class="tags">${d.tags.map(t=>`<span>${t}</span>`).join('')}</div><span class="go">Open</span></div></a>`;ul.appendChild(li);});});}
+all.forEach(t=>{const b=document.createElement('button');b.textContent=t;b.setAttribute('aria-pressed',t===active);b.onclick=()=>{active=t;[...filters.children].forEach(x=>x.setAttribute('aria-pressed',x===b));render();};filters.appendChild(b);});
+render();
+</script>
+</body>
+</html>

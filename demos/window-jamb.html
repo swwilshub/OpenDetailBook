@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Why the window sits over the cavity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--paper:#E4E9E3;--sheet:#F3F6F1;--ink:#15263A;--ink2:#4B5C6D;--rule:#B5C0B8;--pencil:#D39E00;--fault:#BF3A2B;--ok:#2C7A57;--warn:#C27400;--hatch:#15263A;--halo:#F3F6F1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0F161D;--sheet:#16202A;--ink:#E2E8E3;--ink2:#9BA9B4;--rule:#2D3A45;--pencil:#F2C232;--fault:#E4675A;--ok:#5FBE92;--warn:#E8A53E;--hatch:#C8D2CB;--halo:#16202A}}
+:root[data-theme="dark"]{--paper:#0F161D;--sheet:#16202A;--ink:#E2E8E3;--ink2:#9BA9B4;--rule:#2D3A45;--pencil:#F2C232;--fault:#E4675A;--ok:#5FBE92;--warn:#E8A53E;--hatch:#C8D2CB;--halo:#16202A}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 Barlow,"Segoe UI",system-ui,-apple-system,sans-serif}
+.wrap{max-width:880px;margin:0 auto;padding:0 16px}
+header{padding:28px 0 6px}
+h1{font-family:"Barlow Semi Condensed","Arial Narrow",Barlow,sans-serif;font-weight:700;font-size:clamp(30px,6.4vw,48px);line-height:1.02;margin:0 0 10px;letter-spacing:-.01em;max-width:18ch}
+.lede{color:var(--ink2);max-width:62ch;margin:0}
+.stage{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);padding:12px 0 6px}
+@media (max-height:600px){.stage{position:static}}
+.sheet{background:var(--sheet);border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+#view{display:block;width:100%}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:12.5px;color:var(--ink2);padding:6px 2px 0}
+.ramp{display:inline-block;width:110px;height:8px;border-radius:1px;vertical-align:middle;margin:0 4px;background:linear-gradient(90deg,#1E3A6E,#2B7A9E,#7FB7A4,#EBC15A,#D2522F)}
+.story{padding:10px 0 4px;min-height:190px}
+.chap{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.num{font-family:"Barlow Semi Condensed",sans-serif;font-weight:600;color:var(--ink2);font-variant-numeric:tabular-nums;font-size:14px}
+h2{font-family:"Barlow Semi Condensed","Arial Narrow",sans-serif;font-weight:700;font-size:23px;line-height:1.15;margin:0}
+.story p{margin:6px 0 0;max-width:66ch}
+.dyn{color:var(--ink)}
+.dyn b{font-weight:600}
+.controls{display:flex;align-items:center;gap:8px;margin-top:12px}
+button,select{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:3px;padding:6px 12px;min-height:38px;cursor:pointer}
+button:hover{border-color:var(--ink2)}
+:focus-visible{outline:2px solid var(--pencil);outline-offset:2px}
+#play{min-width:84px;font-weight:600}
+.pips{display:flex;gap:5px;margin-left:6px;flex-wrap:wrap}
+.pip{width:26px;height:26px;min-height:0;padding:0;font-size:12.5px;font-family:"Barlow Semi Condensed",sans-serif;font-variant-numeric:tabular-nums}
+.pip[aria-current="step"]{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.reads{display:grid;grid-template-columns:repeat(4,1fr);border-top:1.5px solid var(--ink);border-bottom:1px solid var(--rule);margin-top:16px}
+.read{padding:8px 10px 9px;border-left:1px solid var(--rule);display:flex;flex-direction:column;min-width:0}
+.read:first-child{border-left:0;padding-left:0}
+.read .k{font-size:13px;color:var(--ink2)}
+.read .v{font-family:"Barlow Semi Condensed",sans-serif;font-weight:700;font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.read .s{font-size:12.5px;color:var(--ink2);line-height:1.3}
+.bad{color:var(--fault)}.good{color:var(--ok)}.meh{color:var(--warn)}
+@media (max-width:560px){.reads{grid-template-columns:repeat(2,1fr)}.read:nth-child(3){border-left:0;padding-left:0}.read:nth-child(n+3){border-top:1px solid var(--rule)}.read .v{font-size:24px}}
+.house{font-size:14.5px;color:var(--ink2);margin:8px 0 0;min-height:1.5em}
+section.lab,section.notes{padding:34px 0 8px}
+section h3{font-family:"Barlow Semi Condensed",sans-serif;font-weight:600;font-size:18px;margin:22px 0 4px}
+.lab p,.notes p{max-width:66ch;margin:6px 0}
+.ctl{display:grid;gap:14px;margin-top:14px}
+.ctl label{display:flex;flex-direction:column;gap:4px;font-weight:500}
+.ctl output{font-weight:400;color:var(--ink2)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.row{grid-template-columns:1fr}}
+input[type=range]{width:100%;accent-color:var(--pencil);height:30px}
+#sweep{display:block;width:100%;height:260px;background:var(--sheet);border:1px solid var(--rule);border-radius:3px;margin-top:8px}
+.small{font-size:13.5px;color:var(--ink2)}
+.note{border-left:3px solid var(--warn);padding:4px 0 4px 10px}
+.notes ul{padding-left:20px;max-width:66ch}.notes li{margin:5px 0}
+footer{padding:20px 0 40px;font-size:13px;color:var(--ink2)}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Why the window sits over the cavity</h1>
+<p class="lede">A plan section through a UK window jamb, with a live two-dimensional heat-flow calculation run in your browser. Watch what happens to heat loss and reveal temperature when the frame or the cavity closer is in the wrong place.</p>
+</header>
+
+<div class="stage">
+<div class="sheet"><canvas id="view" role="img" aria-label="Plan section of a cavity wall window jamb with a temperature map"></canvas></div>
+<div class="legend"><span>0 °C<span class="ramp" aria-hidden="true"></span>20 °C</span><span>Moving streaks show heat leaving through the wall and reveal</span></div>
+</div>
+
+<section class="story" aria-live="polite">
+<div class="chap"><span class="num" id="chNum">1 of 7</span><h2 id="chTitle">Loading</h2></div>
+<p id="chText">Setting up the solver.</p>
+<p id="chDyn" class="dyn"></p>
+<div class="controls">
+<button id="prev" aria-label="Previous step">‹</button>
+<button id="play">Pause</button>
+<button id="next" aria-label="Next step">›</button>
+<div class="pips" id="pips"></div>
+</div>
+</section>
+
+<div class="reads">
+<div class="read"><span class="k">Jamb ψ</span><span class="v" id="rPsi">–</span><span class="s" id="sPsi">W/mK</span></div>
+<div class="read"><span class="k">fRsi</span><span class="v" id="rF">–</span><span class="s" id="sF">needs 0.75 or more</span></div>
+<div class="read"><span class="k">Coldest reveal</span><span class="v" id="rT">–</span><span class="s">at 20 °C in, 0 °C out</span></div>
+<div class="read"><span class="k">Frame over cavity</span><span class="v" id="rO">–</span><span class="s" id="sO">30 mm or more</span></div>
+</div>
+<p class="house" id="house"></p>
+
+<section class="lab" id="lab">
+<h2>Try your own detail</h2>
+<p>Move the frame through the wall and change what closes the cavity. The drawing above re-solves as you go, and the curves below show every frame position for the current closer and block.</p>
+<div class="ctl">
+<label>Frame position <output id="oPos"></output><input type="range" id="pos" min="10" max="240" step="5" value="125" aria-describedby="oPos"></label>
+<div class="row">
+<label>At the reveal
+<select id="closer">
+<option value="insulated">Insulated cavity closer</option>
+<option value="return">Inner leaf returned across the cavity</option>
+<option value="void">No closer, batts cut 50 mm short</option>
+<option value="none">No closer, insulation run to the reveal</option>
+</select></label>
+<label>Inner leaf block
+<select id="block">
+<option value="0.15">Aircrete, λ 0.15</option>
+<option value="0.51">Medium density, λ 0.51</option>
+<option value="1.13">Dense aggregate, λ 1.13</option>
+</select></label>
+</div>
+</div>
+<p class="note small" id="noneNote" hidden>Thermally this looks almost as good as a closer, which is the trap. With nothing closing the cavity there is no vertical DPC to stop water tracking to the inner leaf (Part C), and the cavity is left open at the opening, which Part B usually requires to be closed.</p>
+<h3>ψ and fRsi against frame position</h3>
+<canvas id="sweep" aria-label="Chart of psi value and fRsi against frame position"></canvas>
+<p class="small" id="sweepStatus">The sweep runs when this section comes into view.</p>
+</section>
+
+<section class="notes">
+<h2>What the numbers mean</h2>
+<p><b>ψ (psi)</b> is the extra heat lost per metre of junction, over and above the plain wall and the window counted on their own. Part L (Approved Document L 2021, Volume 1) makes SAP 10.2 count every junction; the notional dwelling uses roughly 0.05 W/mK for a jamb, so a detail much worse than that has to be paid for with better fabric elsewhere.</p>
+<p><b>fRsi</b> is the coldest inside surface temperature as a fraction of the inside to outside difference. BRE IP1/06 sets 0.75 as the minimum for dwellings, which is the usual Part C test for surface condensation and mould.</p>
+<h3>The rules the detail follows</h3>
+<ul>
+<li>Keep the insulation line continuous: the frame should overlap the cavity closer, commonly specified as at least 30 mm. The sweep shows why: at 30 mm the reveal sits right on the 0.75 line.</li>
+<li>Close the cavity with an insulated closer carrying a DPC, not a returned block. The old Accredited Construction Details (2007) drew it this way, and LABC and NHBC details still do.</li>
+<li>Line the reveal and fill the frame gap with insulation or low-expansion foam, so no air path links the room or the outside to the cavity.</li>
+<li>Get a BR 497 calculation for the real frame and closer products. SAP 10.2 no longer accepts the old ACD ψ values, and unassessed junctions fall back to much worse defaults.</li>
+</ul>
+<h3>How the calculation is done</h3>
+<p>A finite-volume solver on a 5 mm grid near the junction, following BR 497 conventions: 20 °C inside, 0 °C outside, Rsi 0.13 and Rse 0.04 m²K/W for heat flow, Rsi 0.25 for the fRsi run. The wall runs 1 m back from the reveal. The glazing is replaced by a 30 mm panel of λ 0.035, and the window's own heat loss comes from a separate run of the frame and panel alone with the faces that touch the wall made adiabatic, so ψ = L2D − U<sub>wall</sub>×1 m − L<sub>window</sub>.</p>
+<p class="small">Simplifications: this is the jamb only (heads and sills add lintel and sill bridges). The frame is a 60 × 70 mm block with an equivalent λ of 0.12, the closer an insulated block of λ 0.035, and the open void is held at outdoor temperature. Absolute values will differ from a product-specific calculation; the comparisons between details are the point. Regulation and guidance references are quoted from memory, so check them against the current Approved Documents, BR 497, BRE IP1/06 and your warranty provider's standards before relying on them.</p>
+</section>
+<footer>Materials: brick λ 0.77, cavity insulation λ 0.032, plaster λ 0.57. Whole-house figures assume 24 m of jambs and 2,100 degree-days.</footer>
+</div>
+<script>
+// ---------- geometry (mm, y=0 outside, increasing inwards) ----------
+const PAD=10, Y_BRICK=110, Y_CAV=210, Y_BLOCK=310, Y_FACE=325;
+const XREV=1000, FW=60, FD=70, RETW=15, CL_X=950, RET_X=900;
+const LAM_BRICK=0.77, LAM_INS=0.032, LAM_PL=0.57, LAM_CL=0.035, LAM_FR=0.12, LAM_PN=0.035;
+const RSE=0.04, RSI=0.13, RSI_F=0.25, RS_VOID=0.13, TI=20, TE=0, DT=20;
+const WALLMAT=[0,1,1,1,1,1,0,0,1,0];
+
+function mkEdges(segs){const e=[segs[0][0]];for(const [a,b,d] of segs){const n=Math.round((b-a)/d);for(let k=1;k<=n;k++)e.push(a+k*d);}return e;}
+const XE=mkEdges([[0,600,50],[600,850,10],[850,1100,5],[1100,1260,10]]);
+const YE=mkEdges([[0,335,5]]);
+const NX=XE.length-1, NY=YE.length-1, N=NX*NY;
+const XC=new Float64Array(NX), DXm=new Float64Array(NX), YC=new Float64Array(NY), DYm=new Float64Array(NY);
+for(let i=0;i<NX;i++){XC[i]=(XE[i]+XE[i+1])/2;DXm[i]=(XE[i+1]-XE[i])/1000;}
+for(let j=0;j<NY;j++){YC[j]=(YE[j]+YE[j+1])/2;DYm[j]=(YE[j+1]-YE[j])/1000;}
+
+function uWall(block){return 1/(RSE+0.1/LAM_BRICK+0.1/LAM_INS+0.1/block+0.015/LAM_PL+RSI);}
+function overlapOf(yf){return Math.max(0,Math.min(yf+FD,Y_CAV)-Math.max(yf,Y_BRICK));}
+
+// materials: 0 air,1 brick,2 insulation,3 block,4 plaster,5 closer,6 frame,7 panel,8 returned block,9 ventilated void
+function buildMesh(cfg){
+  const mat=new Uint8Array(N), lam=new Float64Array(N), cls=new Uint8Array(N);
+  const L=[0,LAM_BRICK,LAM_INS,cfg.block,LAM_PL,LAM_CL,LAM_FR,LAM_PN,cfg.block,0];
+  const yf=cfg.yf;
+  for(let j=0;j<NY;j++){const y=YC[j];for(let i=0;i<NX;i++){const x=XC[i];let m=0;
+    if(y>PAD&&y<Y_FACE){
+      if(x<XREV){
+        if(y<Y_BRICK)m=1;
+        else if(y<Y_CAV){
+          if(cfg.closer==='insulated'&&x>CL_X)m=5;
+          else if(cfg.closer==='void'&&x>CL_X)m=9;
+          else if(cfg.closer==='return'&&x>RET_X)m=8;
+          else m=2;
+        } else if(y<Y_BLOCK)m=3; else m=4;
+      } else {
+        if(x<XREV+FW&&y>yf&&y<yf+FD)m=6;
+        else if(x>XREV+FW&&y>yf+20&&y<yf+50)m=7;
+        else if(x<XREV+RETW&&y>yf+FD)m=4;
+      }
+    }
+    const k=j*NX+i;mat[k]=m;lam[k]=L[m];if(m===9)cls[k]=3;
+  }}
+  const flood=(seedRow,c)=>{const q=[];for(let i=0;i<NX;i++){const k=seedRow*NX+i;if(mat[k]===0&&cls[k]===0){cls[k]=c;q.push(k);}}
+    while(q.length){const k=q.pop();const i=k%NX,j=(k-i)/NX;
+      const nbs=[i>0?k-1:-1,i<NX-1?k+1:-1,j>0?k-NX:-1,j<NY-1?k+NX:-1];
+      for(const n of nbs){if(n>=0&&mat[n]===0&&cls[n]===0){cls[n]=c;q.push(n);}}}};
+  flood(0,1);flood(NY-1,2);
+  return {mat,lam,cls,cfg:{...cfg}};
+}
+function windowOnly(mesh){const lam=mesh.lam.slice(),cls=mesh.cls.slice();
+  for(let k=0;k<N;k++)if(lam[k]>0&&mesh.mat[k]!==6&&mesh.mat[k]!==7){lam[k]=0;cls[k]=0;}
+  return {mat:mesh.mat,lam,cls,cfg:mesh.cfg};}
+
+// ft: 1 solid, 2 exterior air, 3 interior air, 4 ventilated void
+function assemble(mesh,rsi){
+  const {lam,cls}=mesh;const id=new Int32Array(N).fill(-1);let n=0;
+  for(let k=0;k<N;k++)if(lam[k]>0)id[k]=n++;
+  const cell=new Int32Array(n),nb=new Int32Array(n*4).fill(-1),g=new Float64Array(n*4),ft=new Uint8Array(n*4),diag=new Float64Array(n),b=new Float64Array(n);
+  for(let k=0;k<N;k++){const c=id[k];if(c<0)continue;cell[c]=k;const i=k%NX,j=(k-i)/NX,la=lam[k];
+    for(let d=0;d<4;d++){let ii=i,jj=j;if(d===0)ii--;else if(d===1)ii++;else if(d===2)jj--;else jj++;
+      if(ii<0||ii>=NX||jj<0||jj>=NY)continue;
+      const k2=jj*NX+ii,hx=d<2,da=hx?DXm[i]:DYm[j],Lf=hx?DYm[j]:DXm[i],ra=da/(2*la);let gg,t;
+      if(lam[k2]>0){const db=hx?DXm[ii]:DYm[jj];gg=Lf/(ra+db/(2*lam[k2]));nb[c*4+d]=id[k2];t=1;}
+      else{const cc=cls[k2];
+        if(cc===1){gg=Lf/(ra+RSE);t=2;b[c]+=gg*TE;}
+        else if(cc===2){gg=Lf/(ra+rsi);t=3;b[c]+=gg*TI;}
+        else if(cc===3){gg=Lf/(ra+RS_VOID);t=4;b[c]+=gg*TE;}
+        else continue;}
+      g[c*4+d]=gg;ft[c*4+d]=t;diag[c]+=gg;}}
+  return {n,id,cell,nb,g,ft,diag,b,rsi};
+}
+function matvec(s,x,y){const {n,nb,g,diag}=s;for(let c=0;c<n;c++){let v=diag[c]*x[c];const o=c*4;
+  let m=nb[o];if(m>=0)v-=g[o]*x[m];m=nb[o+1];if(m>=0)v-=g[o+1]*x[m];m=nb[o+2];if(m>=0)v-=g[o+2]*x[m];m=nb[o+3];if(m>=0)v-=g[o+3]*x[m];y[c]=v;}}
+function solve(s,x,maxIt=5000,tol=1e-9){const n=s.n,r=new Float64Array(n),z=new Float64Array(n),p=new Float64Array(n),Ap=new Float64Array(n),dg=s.diag;
+  matvec(s,x,Ap);let bn=0,rz=0;for(let c=0;c<n;c++){r[c]=s.b[c]-Ap[c];bn+=s.b[c]*s.b[c];z[c]=r[c]/dg[c];p[c]=z[c];rz+=r[c]*z[c];}
+  bn=Math.sqrt(bn);let it=0;
+  for(;it<maxIt;it++){matvec(s,p,Ap);let pAp=0;for(let c=0;c<n;c++)pAp+=p[c]*Ap[c];const a=rz/pAp;let rn=0;
+    for(let c=0;c<n;c++){x[c]+=a*p[c];r[c]-=a*Ap[c];rn+=r[c]*r[c];}
+    if(Math.sqrt(rn)<tol*bn)break;
+    let rz2=0;for(let c=0;c<n;c++){z[c]=r[c]/dg[c];rz2+=r[c]*z[c];}
+    const be=rz2/rz;rz=rz2;for(let c=0;c<n;c++)p[c]=z[c]+be*p[c];}
+  return it;}
+function initX(s,Tg){const x=new Float64Array(s.n);for(let c=0;c<s.n;c++){const k=s.cell[c];const t=Tg?Tg[k]:NaN;
+  x[c]=Number.isFinite(t)?t:TE+(TI-TE)*Math.min(1,Math.max(0,(YC[(k/NX)|0]-PAD)/(Y_FACE-PAD)));}return x;}
+function heatIn(s,x){let Q=0;for(let c=0;c<s.n;c++)for(let d=0;d<4;d++)if(s.ft[c*4+d]===3)Q+=s.g[c*4+d]*(TI-x[c]);return Q;}
+function coldest(s,x,mesh){let best=Infinity,bx=0,by=0;
+  for(let c=0;c<s.n;c++){const k=s.cell[c];if(!WALLMAT[mesh.mat[k]])continue;const i=k%NX,j=(k-i)/NX;
+    for(let d=0;d<4;d++){const o=c*4+d;if(s.ft[o]!==3)continue;const Lf=d<2?DYm[j]:DXm[i];
+      const ts=TI-s.g[o]*(TI-x[c])/Lf*s.rsi;
+      if(ts<best){best=ts;bx=d===0?XE[i]:d===1?XE[i+1]:XC[i];by=d===2?YE[j]:d===3?YE[j+1]:YC[j];}}}
+  return {tmin:best,frsi:(best-TE)/DT,cx:bx,cy:by};}
+function fluxField(s,x){const qx=new Float32Array(N),qy=new Float32Array(N);
+  for(let c=0;c<s.n;c++){const k=s.cell[c],i=k%NX,j=(k-i)/NX,o=c*4,out=[0,0,0,0];
+    for(let d=0;d<4;d++){const t=s.ft[o+d];if(!t)continue;const gg=s.g[o+d];
+      out[d]=t===1?gg*(x[c]-x[s.nb[o+d]]):t===3?gg*(x[c]-TI):gg*(x[c]-TE);}
+    qx[k]=(out[1]-out[0])/DYm[j]/2;qy[k]=(out[3]-out[2])/DXm[i]/2;}
+  return {qx,qy};}
+
+var WIN_Q=null;
+function analyse(cfg,warm,fast){
+  const mesh=buildMesh(cfg);
+  const s1=assemble(mesh,RSI);const x1=initX(s1,warm);const it=solve(s1,x1,fast?160:5000);
+  const T=new Float64Array(N).fill(NaN);for(let c=0;c<s1.n;c++)T[s1.cell[c]]=x1[c];
+  const res={cfg:{...cfg},mesh,s:s1,x:x1,T,flux:fluxField(s1,x1),U:uWall(cfg.block),overlap:overlapOf(cfg.yf),it,full:!fast};
+  if(fast)return res;
+  if(WIN_Q===null){const wm=windowOnly(mesh);const sw=assemble(wm,RSI);const xw=initX(sw,T);solve(sw,xw);WIN_Q=heatIn(sw,xw);}
+  res.Q=heatIn(s1,x1);
+  res.psi=res.Q/DT-res.U*(XREV/1000)-WIN_Q/DT;
+  const s2=assemble(mesh,RSI_F);const x2=initX(s2,T);solve(s2,x2);
+  Object.assign(res,coldest(s2,x2,mesh));
+  return res;
+}
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const RM=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const f3=v=>v.toFixed(3), f2=v=>v.toFixed(2), f1=v=>v.toFixed(1);
+const BEST={yf:125,closer:'insulated',block:0.15};
+
+// ---------- view ----------
+const VX0=760,VX1=1260,VY0=-26,VY1=361;
+const cv=$('view'),ctx=cv.getContext('2d');
+const hatchC=document.createElement('canvas'),heatC=document.createElement('canvas');
+let W=600,H=400,dpr=1,PXE=[],PYE=[],COL={},PAT={};
+const sx=x=>(x-VX0)/(VX1-VX0)*W, sy=y=>(y-VY0)/(VY1-VY0)*H;
+let I0=0,I1=NX-1;
+for(let i=0;i<NX;i++){if(XE[i+1]<=VX0)I0=i+1;if(XE[i]<VX1)I1=i;}
+const ixAt=new Int16Array(1260),iyAt=new Int16Array(335);
+for(let m=0,i=0;m<1260;m++){while(XE[i+1]<=m+0.5)i++;ixAt[m]=i;}
+for(let m=0,j=0;m<335;m++){while(YE[j+1]<=m+0.5)j++;iyAt[m]=j;}
+
+function readColours(){const cs=getComputedStyle(document.documentElement);
+  for(const k of ['paper','sheet','ink','ink2','rule','pencil','fault','ok','warn','hatch','halo'])COL[k]=cs.getPropertyValue('--'+k).trim();}
+const TINT={1:'rgba(178,96,64,.24)',2:'rgba(222,190,70,.30)',3:'rgba(128,140,150,.22)',4:'rgba(205,200,188,.55)',5:'rgba(211,158,0,.55)',6:'rgba(60,78,100,.55)',7:'rgba(110,160,195,.40)',8:'rgba(96,106,118,.55)',9:'rgba(0,0,0,0)'};
+function mkPat(g,size,draw){const c=document.createElement('canvas');c.width=c.height=Math.round(size*dpr);const p=c.getContext('2d');p.scale(dpr,dpr);p.strokeStyle=COL.hatch;p.fillStyle=COL.hatch;p.lineWidth=.8;draw(p,size);
+  const pat=g.createPattern(c,'repeat');if(pat.setTransform)pat.setTransform(new DOMMatrix().scale(1/dpr));return pat;}
+function buildPatterns(g){
+  PAT[1]=mkPat(g,6,(p,s)=>{p.globalAlpha=.45;p.beginPath();p.moveTo(-1,s+1);p.lineTo(s+1,-1);p.moveTo(-1,1);p.lineTo(1,-1);p.moveTo(s-1,s+1);p.lineTo(s+1,s-1);p.stroke();});
+  PAT[2]=mkPat(g,10,(p,s)=>{p.globalAlpha=.5;p.beginPath();p.moveTo(0,5);p.quadraticCurveTo(2.5,1,5,5);p.quadraticCurveTo(7.5,9,10,5);p.stroke();});
+  PAT[3]=mkPat(g,10,(p,s)=>{p.globalAlpha=.28;p.beginPath();p.moveTo(0,0);p.lineTo(s,s);p.moveTo(s,0);p.lineTo(0,s);p.stroke();});
+  PAT[4]=mkPat(g,4,(p)=>{p.globalAlpha=.45;p.fillRect(1,1,.8,.8);});
+  PAT[5]=mkPat(g,6,(p)=>{p.globalAlpha=.65;p.beginPath();p.moveTo(0,5);p.lineTo(3,1);p.lineTo(6,5);p.stroke();});
+  PAT[6]=mkPat(g,5,(p)=>{p.globalAlpha=.35;p.beginPath();p.moveTo(2.5,0);p.lineTo(2.5,5);p.stroke();});
+  PAT[7]=mkPat(g,8,(p)=>{p.globalAlpha=.25;p.beginPath();p.moveTo(0,4);p.lineTo(8,4);p.stroke();});
+  PAT[8]=mkPat(g,6,(p,s)=>{p.globalAlpha=.4;p.beginPath();p.moveTo(0,0);p.lineTo(s,s);p.moveTo(s,0);p.lineTo(0,s);p.stroke();});
+}
+function resize(){const w=cv.parentElement.clientWidth;if(!w)return;W=w;H=Math.round(W*(VY1-VY0)/(VX1-VX0));dpr=Math.min(2.5,window.devicePixelRatio||1);
+  for(const c of [cv,hatchC,heatC]){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);}cv.style.height=H+'px';
+  PXE=XE.map(x=>Math.round(sx(x)*dpr)/dpr);PYE=YE.map(y=>Math.round(sy(y)*dpr)/dpr);
+  readColours();buildPatterns(hatchC.getContext('2d'));dirty=true;}
+
+// ---------- colour map ----------
+const STOPS=[[0,[30,58,110]],[5,[43,122,158]],[10,[127,183,164]],[15,[235,193,90]],[20,[210,82,47]]];
+function tcol(t){t=Math.max(0,Math.min(20,t));let a=STOPS[0],b=STOPS[1];for(let s=1;s<STOPS.length;s++){if(t<=STOPS[s][0]){a=STOPS[s-1];b=STOPS[s];break;}}
+  const u=(t-a[0])/(b[0]-a[0]);return `rgb(${Math.round(a[1][0]+(b[1][0]-a[1][0])*u)},${Math.round(a[1][1]+(b[1][1]-a[1][1])*u)},${Math.round(a[1][2]+(b[1][2]-a[1][2])*u)})`;}
+
+// ---------- state ----------
+let res=null,dirty=true,outline=null,heatA=0,heatT=0,reveal=1,pencilP=0,showPencil=false,busy=false;
+let cur={...BEST},slide=null,navTok=0,autoTimer=null,playing=!RM,chapter=0,labMode=false;
+const bestCache={};
+function bestPsi(block){if(!(block in bestCache))bestCache[block]=analyse({...BEST,block},res&&res.T,false).psi;return bestCache[block];}
+
+// ---------- layers ----------
+function rectPath(p,i,j){p.rect(PXE[i],PYE[j],PXE[i+1]-PXE[i],PYE[j+1]-PYE[j]);}
+function buildLayers(){
+  const m=res.mesh,g=hatchC.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
+  const paths={},ext=new Path2D(),int=new Path2D();
+  for(let j=0;j<NY;j++)for(let i=I0;i<=I1;i++){const k=j*NX+i,mm=m.mat[k];
+    if(mm===0){rectPath(m.cls[k]===1?ext:int,i,j);}else{(paths[mm]||(paths[mm]=new Path2D()));rectPath(paths[mm],i,j);}}
+  g.fillStyle='rgba(43,122,158,.10)';g.fill(ext);g.fillStyle='rgba(210,82,47,.07)';g.fill(int);
+  for(const mm in paths){g.fillStyle=TINT[mm];g.fill(paths[mm]);if(PAT[mm]){g.fillStyle=PAT[mm];g.fill(paths[mm]);}}
+  // outlines
+  outline=new Path2D();const key=k=>m.mat[k]===0?0:m.mat[k];
+  for(let j=0;j<NY;j++)for(let i=I0;i<=I1;i++){const k=j*NX+i,a=key(k);
+    if(i<I1&&key(k+1)!==a){outline.moveTo(PXE[i+1],PYE[j]);outline.lineTo(PXE[i+1],PYE[j+1]);}
+    if(j<NY-1&&key(k+NX)!==a){outline.moveTo(PXE[i],PYE[j+1]);outline.lineTo(PXE[i+1],PYE[j+1]);}}
+  // heat layer
+  const h=heatC.getContext('2d');h.setTransform(dpr,0,0,dpr,0,0);h.clearRect(0,0,W,H);
+  h.fillStyle='rgba(30,58,110,.16)';h.fill(ext);h.fillStyle='rgba(210,82,47,.12)';h.fill(int);
+  for(let j=0;j<NY;j++)for(let i=I0;i<=I1;i++){const t=res.T[j*NX+i];if(!Number.isFinite(t))continue;h.fillStyle=tcol(t);h.fillRect(PXE[i],PYE[j],PXE[i+1]-PXE[i]+.4,PYE[j+1]-PYE[j]+.4);}
+  // isotherms
+  h.lineWidth=.8;h.strokeStyle='rgba(255,255,255,.55)';h.beginPath();
+  const T=res.T;
+  for(let L=2;L<20;L+=2){
+    for(let j=0;j<NY-1;j++)for(let i=I0;i<I1;i++){const a=T[j*NX+i],b=T[j*NX+i+1],c=T[(j+1)*NX+i+1],d=T[(j+1)*NX+i];
+      if(!(Number.isFinite(a)&&Number.isFinite(b)&&Number.isFinite(c)&&Number.isFinite(d)))continue;
+      const code=(a>=L?1:0)|(b>=L?2:0)|(c>=L?4:0)|(d>=L?8:0);if(code===0||code===15)continue;
+      const x0=XC[i],x1=XC[i+1],y0=YC[j],y1=YC[j+1];
+      const P={t:[x0+(L-a)/(b-a)*(x1-x0),y0],r:[x1,y0+(L-b)/(c-b)*(y1-y0)],b:[x0+(L-d)/(c-d)*(x1-x0),y1],l:[x0,y0+(L-a)/(d-a)*(y1-y0)]};
+      const S={1:['l','t'],2:['t','r'],3:['l','r'],4:['r','b'],5:['l','t','r','b'],6:['t','b'],7:['l','b'],8:['b','l'],9:['t','b'],10:['t','r','b','l'],11:['r','b'],12:['r','l'],13:['t','r'],14:['l','t']}[code];
+      for(let s=0;s<S.length;s+=2){const p=P[S[s]],q=P[S[s+1]];h.moveTo(sx(p[0]),sy(p[1]));h.lineTo(sx(q[0]),sy(q[1]));}}}
+  h.stroke();
+  buildSpawn();dirty=false;
+}
+
+// ---------- particles ----------
+let spawn={faces:[],cum:[],Q:0},parts=[];
+function buildSpawn(){const s=res.s,m=res.mesh,faces=[],cum=[];let Q=0;
+  for(let c=0;c<s.n;c++){const k=s.cell[c];if(!WALLMAT[m.mat[k]])continue;const i=k%NX,j=(k-i)/NX;if(XE[i+1]<VX0)continue;
+    for(let d=0;d<4;d++){const o=c*4+d;if(s.ft[o]!==3)continue;const w=s.g[o]*(TI-res.x[c]);if(w<=0)continue;Q+=w;cum.push(Q);
+      faces.push(d<2?{x:d===0?XE[i]+.4:XE[i+1]-.4,y0:YE[j],y1:YE[j+1]}:{y:d===2?YE[j]+.4:YE[j+1]-.4,x0:XE[i],x1:XE[i+1]});}}
+  spawn={faces,cum,Q};}
+function spawnOne(){const r=Math.random()*spawn.Q;let lo=0,hi=spawn.cum.length-1;while(lo<hi){const mid=(lo+hi)>>1;if(spawn.cum[mid]<r)lo=mid+1;else hi=mid;}
+  const f=spawn.faces[lo];if(!f)return;const x=f.x!==undefined?f.x:f.x0+Math.random()*(f.x1-f.x0),y=f.y!==undefined?f.y:f.y0+Math.random()*(f.y1-f.y0);
+  parts.push({x,y,h:[],age:0});}
+function stepParts(dt){if(!res||heatA<.3||RM){parts.length=0;return;}
+  const n=spawn.Q*26*dt;let k=Math.floor(n)+(Math.random()<n%1?1:0);while(k-->0&&parts.length<800)spawnOne();
+  const {qx,qy}=res.flux,lam=res.mesh.lam;
+  for(let p=parts.length-1;p>=0;p--){const P=parts[p];P.age+=dt;const xi=Math.floor(P.x),yi=Math.floor(P.y);
+    if(xi<0||xi>=1260||yi<0||yi>=335||P.age>9){parts.splice(p,1);continue;}
+    const kk=iyAt[yi]*NX+ixAt[xi];if(!(lam[kk]>0)){parts.splice(p,1);continue;}
+    let vx=qx[kk]*12,vy=qy[kk]*12;const sp=Math.hypot(vx,vy);if(sp>240){vx*=240/sp;vy*=240/sp;}
+    P.h.push(P.x,P.y);if(P.h.length>12)P.h.splice(0,2);P.x+=vx*dt;P.y+=vy*dt;}}
+function drawParts(){if(!parts.length)return;ctx.save();ctx.globalAlpha=Math.min(1,(heatA-.3)/.5);ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.3;ctx.lineCap='round';ctx.beginPath();
+  for(const P of parts){if(P.x<VX0)continue;const h=P.h;if(h.length<2)continue;ctx.moveTo(sx(h[0]),sy(h[1]));for(let q=2;q<h.length;q+=2)ctx.lineTo(sx(h[q]),sy(h[q+1]));ctx.lineTo(sx(P.x),sy(P.y));}
+  ctx.stroke();ctx.restore();}
+
+// ---------- pencil line ----------
+function pencilSegs(cfg){const fc=cfg.yf+FD/2,ov=overlapOf(cfg.yf),segs=[];const cy=160;
+  const retBad=cfg.closer==='return',endBad=cfg.closer==='return'||cfg.closer==='void';
+  segs.push({a:[VX0,cy],b:[RET_X,cy],s:'ok'});
+  segs.push({a:[RET_X,cy],b:[CL_X,cy],s:retBad?'bad':'ok'});
+  segs.push({a:[CL_X,cy],b:[XREV,cy],s:endBad?'bad':'ok'});
+  segs.push({a:[XREV,cy],b:[XREV+FW/2,fc],s:ov>=30?'ok':ov>0?'warn':'bad'});
+  segs.push({a:[XREV+FW/2,fc],b:[VX1,fc],s:'ok'});
+  return segs;}
+function drawPencil(){if(!showPencil||pencilP<=0)return;const segs=pencilSegs(cur);let total=0;for(const s of segs)s.len=Math.hypot(sx(s.b[0])-sx(s.a[0]),sy(s.b[1])-sy(s.a[1])),total+=s.len;
+  let left=pencilP*total;ctx.save();ctx.lineCap='round';
+  const marks=[];
+  for(const s of segs){if(left<=0)break;const u=Math.min(1,left/s.len);left-=s.len;
+    const ax=sx(s.a[0]),ay=sy(s.a[1]),bx=ax+(sx(s.b[0])-ax)*u,by=ay+(sy(s.b[1])-ay)*u;
+    const col=s.s==='ok'?COL.pencil:s.s==='warn'?COL.warn:COL.fault;
+    ctx.setLineDash(s.s==='bad'?[5,4]:[]);
+    ctx.strokeStyle=COL.halo;ctx.lineWidth=5.5;ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke();
+    ctx.strokeStyle=col;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke();
+    if(s.s!=='ok'&&u===1)marks.push([(ax+bx)/2,(ay+by)/2,s.s]);}
+  ctx.setLineDash([]);
+  for(const [x,y,st] of marks){ctx.fillStyle=COL.halo;ctx.beginPath();ctx.arc(x,y,8,0,7);ctx.fill();ctx.strokeStyle=st==='bad'?COL.fault:COL.warn;ctx.lineWidth=2.2;
+    if(st==='bad'){ctx.beginPath();ctx.moveTo(x-4,y-4);ctx.lineTo(x+4,y+4);ctx.moveTo(x+4,y-4);ctx.lineTo(x-4,y+4);ctx.stroke();}
+    else{ctx.beginPath();ctx.moveTo(x,y-5);ctx.lineTo(x,y+1.5);ctx.moveTo(x,y+4);ctx.lineTo(x,y+4.5);ctx.stroke();}}
+  ctx.restore();}
+
+// ---------- labels ----------
+function label(t,x,y,opt={}){ctx.save();ctx.font=`${opt.w||600} ${opt.size||12}px "Barlow Semi Condensed","Arial Narrow",sans-serif`;ctx.textAlign=opt.align||'left';ctx.textBaseline='middle';
+  ctx.lineJoin='round';ctx.lineWidth=3.5;ctx.strokeStyle=COL.halo;ctx.strokeText(t,x,y);ctx.fillStyle=opt.col||COL.ink;ctx.fillText(t,x,y);ctx.restore();}
+function drawLabels(){const small=W<480,fs=small?11:12.5,x0=sx(768);
+  label('Outside, 0 °C',x0,sy(-13),{size:fs+1});label('Inside, 20 °C',x0,sy(347),{size:fs+1});
+  const a=1-heatA*0.25;ctx.globalAlpha=a;
+  label('Brick outer leaf',x0,sy(60),{size:fs});label('Cavity insulation',x0,sy(160),{size:fs});label(cur.block>1?'Dense block':cur.block>0.3?'Medium block':'Aircrete block',x0,sy(260),{size:fs});
+  const yf=cur.yf;
+  const clText={insulated:'Cavity closer',return:'Returned block',void:'Open void',none:'No closer'}[cur.closer];
+  const ly=yf>95?Math.max(40,yf-40):Math.min(300,yf+FD+45);const lx=sx(1080);
+  ctx.strokeStyle=COL.ink;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(lx-4,sy(ly));ctx.lineTo(sx(cur.closer==='return'?950:975),sy(165));ctx.stroke();
+  label(clText,lx,sy(ly),{size:fs});
+  label('Frame',sx(1068),sy(yf+(yf>60?-9:FD+12)),{size:fs});
+  label('Glazing',sx(1252),sy(yf+35+(yf>60?-26:26)),{size:fs,align:'right'});
+  ctx.globalAlpha=1;
+  // scale bar
+  const by=sy(350),bx=sx(1150);ctx.strokeStyle=COL.ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(bx,by-3);ctx.lineTo(bx,by);ctx.lineTo(sx(1250),by);ctx.lineTo(sx(1250),by-3);ctx.stroke();
+  label('100 mm',sx(1200),by-8,{size:10.5,align:'center',w:500});
+  // coldest point
+  if(res&&res.full&&heatA>.5){const x=sx(res.cx),y=sy(res.cy);ctx.save();ctx.globalAlpha=Math.min(1,(heatA-.5)*2);
+    const bad=res.frsi<0.75;ctx.strokeStyle=bad?COL.fault:COL.ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,7,0,7);ctx.stroke();
+    const tx=Math.min(x+12,W-6),al=x+12>W-120?'right':'left';const ty=Math.min(y+20,sy(336));
+    label(`${f1(res.tmin)} °C`,al==='right'?x-12:tx,ty,{size:fs+1,col:bad?COL.fault:COL.ink,align:al});ctx.restore();}
+  if(busy){label('Solving',W-8,14,{size:11,align:'right',w:500,col:COL.ink2});}
+}
+
+// ---------- render loop ----------
+let last=performance.now();
+function render(){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle=COL.sheet;ctx.fillRect(0,0,W,H);if(!res)return;
+  if(dirty)buildLayers();
+  ctx.save();if(reveal<1){ctx.beginPath();ctx.rect(0,0,W*reveal,H);ctx.clip();}
+  ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(hatchC,0,0);if(heatA>.01){ctx.globalAlpha=heatA;ctx.drawImage(heatC,0,0);ctx.globalAlpha=1;}
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.strokeStyle=COL.ink;ctx.globalAlpha=.85;ctx.lineWidth=1;ctx.stroke(outline);ctx.globalAlpha=1;
+  drawParts();drawPencil();ctx.restore();drawLabels();}
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+  heatA+=(heatT-heatA)*Math.min(1,dt*(RM?20:2.6));
+  if(reveal<1)reveal=RM?1:Math.min(1,reveal+dt/1.5);
+  if(showPencil&&!slide&&!busy&&reveal>=1)pencilP=RM?1:Math.min(1,pencilP+dt/1.8);
+  if(slide&&now-slide.t>38){slide.t=now;const d=Math.sign(slide.target-cur.yf);cur.yf+=d*5;
+    res=analyse(cur,res.T,true);dirty=true;if(cur.yf===slide.target){const s=slide;slide=null;settle(s.tok,s.done);}}
+  stepParts(dt);render();requestAnimationFrame(frame);}
+
+// ---------- navigation ----------
+function settle(tok,done){busy=true;setTimeout(()=>{if(tok!==navTok){busy=false;return;}
+  res=analyse(cur,res.T,false);dirty=true;busy=false;showReadouts();if(done)done();},20);}
+function goTo(target,done,instant){const tok=++navTok;clearTimeout(autoTimer);slide=null;
+  const structural=target.closer!==cur.closer||target.block!==cur.block;cur.closer=target.closer;cur.block=target.block;
+  if(structural&&!instant){res=analyse(cur,res.T,true);dirty=true;}
+  if(target.yf!==cur.yf&&!instant&&!RM){slide={target:target.yf,t:0,tok,done};}
+  else{cur.yf=target.yf;if(instant){res=analyse(cur,res.T,true);dirty=true;}settle(tok,done);}}
+
+function stats(r){const bad=r.frsi<0.75,ratio=r.psi/0.05;
+  return `ψ = <b>${f3(r.psi)} W/mK</b>, ${ratio<1.05?'at or under':ratio.toFixed(1)+'×'} the roughly 0.05 W/mK a jamb gets in the notional dwelling. The coldest reveal surface is <b>${f1(r.tmin)} °C</b>, fRsi ${f2(r.frsi)}${bad?', <span class="bad">below the 0.75 limit, so expect condensation and mould on the reveal</span>.':', above the 0.75 mould limit.'}`;}
+const CH=[
+ {t:'A UK cavity wall, from above',cfg:BEST,heat:false,pencil:false,build:true,
+  s:'Plan section through a window jamb, outside at the top: 100 mm brick, 100 mm full-fill cavity insulation, 100 mm aircrete block and 15 mm plaster, returned into the reveal.',
+  d:r=>`Away from the window this wall has a U-value of <b>${f3(r.U)} W/m²K</b>, inside the 0.26 Part L limit. Everything interesting happens at the reveal.`},
+ {t:'The pencil test',cfg:BEST,heat:false,pencil:true,
+  s:'Trace the insulation without lifting the pencil. It runs down the cavity, through the insulated closer, and then has to land on the window, because across the opening the frame and glazing are the insulation.',
+  d:r=>`That only works if the frame sits over the cavity. Here it overlaps by <b>${r.overlap} mm</b>, so the line is unbroken.`},
+ {t:'The good detail: frame over the closer',cfg:BEST,heat:true,pencil:true,
+  s:'The same drawing, now solved for heat flow. Colour is temperature, thin lines are 2 °C isotherms, and the streaks are heat leaving the room.',d:stats},
+ {t:'Fault: frame flush with the brick face',cfg:{yf:10,closer:'insulated',block:0.15},heat:true,pencil:true,
+  s:'Often done for a deep internal sill. The frame is now in front of the insulation line, so the warm plastered reveal runs straight into the cold outer brick.',d:stats},
+ {t:'Fault: frame pushed back to the inner leaf',cfg:{yf:240,closer:'insulated',block:0.15},heat:true,pencil:true,
+  s:'Now the frame is behind the insulation line, and the warm inner block is open to outside air along the external reveal. Common when frames go in after the inner leaf is up.',d:stats},
+ {t:'Fault: cavity closed with a returned block',cfg:{yf:125,closer:'return',block:1.13},heat:true,pencil:true,
+  s:'The traditional closure: the inner leaf, here dense block, turned across to meet the brick. The frame is in the right place, but 100 mm of masonry now bridges the insulation.',d:stats},
+ {t:'Fault: no closer, batts cut short',cfg:{yf:125,closer:'void',block:0.15},heat:true,pencil:true,
+  s:'The insulation stops 50 mm short and nothing closes the cavity. Gaps round the frame let outside air into the void, so it is modelled at outdoor temperature. Frame position cannot rescue this.',d:stats},
+];
+const pips=$('pips');CH.forEach((c,i)=>{const b=document.createElement('button');b.className='pip';b.textContent=i+1;b.setAttribute('aria-label',`Step ${i+1}: ${c.t}`);b.onclick=()=>{setPlaying(false);show(i);};pips.appendChild(b);});
+function show(i){chapter=i;labMode=false;const c=CH[i];
+  $('chNum').textContent=`${i+1} of ${CH.length}`;$('chTitle').textContent=c.t;$('chText').textContent=c.s;$('chDyn').innerHTML='';
+  [...pips.children].forEach((b,k)=>b.toggleAttribute('aria-current',k===i)&&b.setAttribute('aria-current','step'));
+  heatT=c.heat?1:0;showPencil=false;pencilP=0;if(c.build&&!RM)reveal=0;parts.length=0;
+  syncLab(c.cfg);
+  goTo(c.cfg,()=>{$('chDyn').innerHTML=c.d(res);showPencil=c.pencil;pencilP=0;
+    if(playing){autoTimer=setTimeout(()=>{if(chapter<CH.length-1)show(chapter+1);else setPlaying(false,true);},c.heat?9500:8000);}});}
+function setPlaying(p,ended){playing=p;$('play').textContent=p?'Pause':ended?'Replay':'Play';if(!p)clearTimeout(autoTimer);}
+$('play').onclick=()=>{if(playing){setPlaying(false);}else{setPlaying(true);show(labMode||chapter>=CH.length-1&&$('play').textContent==='Replay'?0:chapter);}};
+$('prev').onclick=()=>{setPlaying(false);show(Math.max(0,chapter-1));};
+$('next').onclick=()=>{setPlaying(false);show(Math.min(CH.length-1,chapter+1));};
+
+function showReadouts(){const r=res;if(!r||!r.full)return;
+  $('rPsi').textContent=f3(r.psi);$('rPsi').className='v '+(r.psi<=0.05?'good':r.psi<=0.1?'meh':'bad');
+  $('sPsi').textContent=r.psi<=0.05?'W/mK, within the 0.05 reference':`W/mK, ${(r.psi/0.05).toFixed(1)}× the 0.05 reference`;
+  $('rF').textContent=f2(r.frsi);$('rF').className='v '+(r.frsi>=0.75?'good':'bad');$('sF').textContent=r.frsi>=0.75?'passes 0.75':'fails 0.75, mould risk';
+  $('rT').textContent=f1(r.tmin)+' °C';$('rT').className='v '+(r.frsi>=0.75?'':'bad');
+  $('rO').textContent=r.overlap+' mm';$('rO').className='v '+(r.overlap>=30?'good':r.overlap>0?'meh':'bad');
+  $('sO').textContent=r.overlap>=30?'meets the 30 mm rule':r.overlap>0?'under the 30 mm rule':'misses the cavity';
+  const dp=r.psi-bestPsi(r.cfg.block);
+  $('house').innerHTML=dp>0.004?`Over 24 m of jambs in a typical house this adds about <b>${(dp*24).toFixed(1)} W/K</b> compared with the good detail, roughly <b>${Math.round(dp*24*50.4)} kWh a year</b> of extra heating.`:'This is the reference detail for the whole-house comparison.';
+  if(labMode)$('chDyn').innerHTML=stats(r);
+  if(sweep.data)drawSweep();}
+
+// ---------- lab ----------
+const pos=$('pos'),selC=$('closer'),selB=$('block');
+function posText(yf){return `outer face ${yf-10} mm behind the brick face, ${overlapOf(yf)} mm over the cavity`;}
+function syncLab(cfg){pos.value=cfg.yf;selC.value=cfg.closer;selB.value=String(cfg.block);$('oPos').textContent=posText(cfg.yf);$('noneNote').hidden=cfg.closer!=='none';maybeSweep();}
+function labCfg(){return {yf:+pos.value,closer:selC.value,block:+selB.value};}
+function enterLab(){if(!labMode){labMode=true;setPlaying(false);$('chNum').textContent='Your detail';$('chTitle').textContent='Custom jamb';$('chText').textContent='Set from the controls below.';[...pips.children].forEach(b=>b.removeAttribute('aria-current'));heatT=1;showPencil=true;pencilP=1;}}
+let dragTimer=null;
+pos.addEventListener('input',()=>{if(!res)return;enterLab();$('oPos').textContent=posText(+pos.value);++navTok;slide=null;cur.yf=+pos.value;res=analyse(cur,res.T,true);dirty=true;
+  clearTimeout(dragTimer);dragTimer=setTimeout(()=>settle(navTok),180);if(sweep.data)drawSweep();});
+for(const s of [selC,selB])s.addEventListener('change',()=>{if(!res)return;enterLab();const c=labCfg();$('noneNote').hidden=c.closer!=='none';goTo(c,null,true);maybeSweep();});
+
+// ---------- sweep ----------
+const sweep={key:null,data:null,tok:0,visible:false};const YS=[];for(let y=10;y<=240;y+=5)YS.push(y);
+function maybeSweep(){if(!sweep.visible)return;const c=labCfg();const key=c.closer+'|'+c.block;if(key===sweep.key)return;sweep.key=key;
+  const tok=++sweep.tok;sweep.data={psi:[],f:[],closer:c.closer,block:c.block};let warm=res&&res.T,k=0;$('sweepStatus').textContent='Running the sweep…';
+  const step=()=>{if(tok!==sweep.tok)return;const t0=performance.now();
+    while(k<YS.length&&performance.now()-t0<30){const r=analyse({yf:YS[k],closer:c.closer,block:c.block},warm,false);warm=r.T;sweep.data.psi.push(r.psi);sweep.data.f.push(r.frsi);k++;}
+    drawSweep();if(k<YS.length)setTimeout(step,16);else{const mi=sweep.data.psi.indexOf(Math.min(...sweep.data.psi));
+      $('sweepStatus').textContent=`${YS.length} solves. Lowest ψ ${f3(sweep.data.psi[mi])} W/mK with the frame ${YS[mi]-10} mm behind the brick face. The shaded band is 30 mm or more over the cavity.`;}};
+  setTimeout(step,30);}
+function drawSweep(){const c=$('sweep'),w=c.clientWidth,h=c.clientHeight,d=Math.min(2.5,devicePixelRatio||1);c.width=w*d;c.height=h*d;const g=c.getContext('2d');g.scale(d,d);g.clearRect(0,0,w,h);
+  const D=sweep.data;if(!D)return;const L=44,R=w-12,xs=p=>L+(p/230)*(R-L);
+  const P1=[14,112],P2=[140,h-34];
+  const pv=D.psi,fv=D.f;const pmax=Math.max(0.06,...pv)*1.08,pmin=Math.min(0,...pv);const fmin=Math.min(0.7,...fv)-0.03,fmax=1;
+  const yp=v=>P1[1]-(v-pmin)/(pmax-pmin)*(P1[1]-P1[0]),yfv=v=>P2[1]-(v-fmin)/(fmax-fmin)*(P2[1]-P2[0]);
+  g.font='500 11.5px "Barlow Semi Condensed",sans-serif';g.textBaseline='middle';
+  // band
+  g.fillStyle='rgba(44,122,87,.13)';for(const P of [P1,P2])g.fillRect(xs(60),P[0],xs(170)-xs(60),P[1]-P[0]);
+  // cavity zone marks
+  g.strokeStyle=COL.rule;g.lineWidth=1;for(const P of [P1,P2]){g.strokeRect(L,P[0],R-L,P[1]-P[0]);}
+  g.fillStyle=COL.ink2;g.textAlign='right';
+  for(const v of (pmax<0.25?[0,0.05,0.1,0.15,0.2]:[0,0.1,0.2,0.3,0.4,0.5]))if(v>=pmin&&v<=pmax){g.fillText(v.toFixed(2),L-5,yp(v));g.beginPath();g.moveTo(L,yp(v));g.lineTo(R,yp(v));g.globalAlpha=.4;g.stroke();g.globalAlpha=1;}
+  for(const v of [0.6,0.7,0.8,0.9,1])if(v>=fmin){g.fillText(v.toFixed(1),L-5,yfv(v));}
+  g.textAlign='left';g.fillStyle=COL.ink;g.fillText('ψ, W/mK',L+6,P1[0]+10);g.fillText('fRsi',L+6,P2[0]+10);
+  // references
+  g.setLineDash([4,3]);g.lineWidth=1.2;g.strokeStyle=COL.ink2;g.beginPath();g.moveTo(L,yp(0.05));g.lineTo(R,yp(0.05));g.stroke();
+  g.strokeStyle=COL.fault;g.beginPath();g.moveTo(L,yfv(0.75));g.lineTo(R,yfv(0.75));g.stroke();g.setLineDash([]);
+  g.fillStyle=COL.fault;g.textAlign='right';g.fillText('0.75 limit',R-4,yfv(0.75)-8);
+  // lines
+  const line=(arr,f,col)=>{g.strokeStyle=col;g.lineWidth=2.2;g.beginPath();arr.forEach((v,i)=>{const x=xs(YS[i]-10),y=f(v);i?g.lineTo(x,y):g.moveTo(x,y);});g.stroke();};
+  line(pv,yp,COL.ink);line(fv,yfv,COL.ink);
+  // x axis
+  g.fillStyle=COL.ink2;g.textAlign='center';for(let p=0;p<=230;p+=50)g.fillText(p,xs(p),P2[1]+12);
+  g.fillText('Frame outer face behind the brick face, mm',(L+R)/2,h-10);
+  // marker
+  const mp=(labMode?+pos.value:cur.yf)-10;g.strokeStyle=COL.pencil;g.lineWidth=2;g.beginPath();g.moveTo(xs(mp),P1[0]);g.lineTo(xs(mp),P1[1]);g.moveTo(xs(mp),P2[0]);g.lineTo(xs(mp),P2[1]);g.stroke();}
+new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){sweep.visible=true;maybeSweep();}},{rootMargin:'0px 0px -20% 0px'}).observe($('sweep'));
+
+// ---------- boot ----------
+new ResizeObserver(()=>{resize();if(sweep.data)drawSweep();}).observe(cv.parentElement);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{readColours();buildPatterns(hatchC.getContext('2d'));dirty=true;if(sweep.data)drawSweep();});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{dirty=true;});
+resize();setPlaying(!RM);
+requestAnimationFrame(frame);
+setTimeout(()=>{res=analyse(BEST,null,false);bestCache[0.15]=res.psi;dirty=true;show(0);},40);
+})();
+</script></body></html>
