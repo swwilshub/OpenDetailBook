@@ -80,7 +80,7 @@ export async function launch() {
 }
 
 // Open a page at 720×900, wait 5 s, click the 4th chapter pip if there is one,
-// screenshot the stage and save it as a 640×397 webp.
+// screenshot the stage (#vp, .sheet, canvas, else the largest svg) and save it as a 640×397 webp.
 export async function makeThumb(browser, pageUrl, outFile) {
   const page = await browser.newPage({ viewport: { width: 720, height: 900 }, deviceScaleFactor: 1 });
   try {
@@ -96,8 +96,21 @@ export async function makeThumb(browser, pageUrl, outFile) {
       const l = page.locator(sel).first();
       if (await l.count() && await l.isVisible()) { stage = l; break; }
     }
-    if (!stage) throw new Error(`No #vp, .sheet or canvas on ${pageUrl}`);
+    // Pages drawn in SVG rather than on a canvas: use the largest visible drawing.
+    let fit = 'cover';
+    if (!stage) {
+      let best = 0;
+      fit = 'contain';
+      for (const l of await page.locator('svg').all()) {
+        const b = await l.isVisible() && await l.boundingBox();
+        if (b && b.width * b.height > best) { best = b.width * b.height; stage = l; }
+      }
+    }
+    if (!stage) throw new Error(`No #vp, .sheet, canvas or svg on ${pageUrl}`);
     const png = await stage.screenshot();
-    await sharp(png).resize(THUMB_W, THUMB_H, { fit: 'cover', position: 'centre' }).webp({ quality: 82 }).toFile(outFile);
+    // A canvas stage is cropped to fill the card; an svg drawing is letterboxed on its own
+    // background colour so labels near its edges aren't cut off.
+    const { data: [r, g, b] } = await sharp(png).extract({ left: 0, top: 0, width: 1, height: 1 }).raw().toBuffer({ resolveWithObject: true });
+    await sharp(png).resize(THUMB_W, THUMB_H, { fit, position: 'centre', background: { r, g, b } }).webp({ quality: 82 }).toFile(outFile);
   } finally { await page.close(); }
 }
